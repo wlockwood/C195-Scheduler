@@ -19,9 +19,9 @@ public class Scheduler extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-        Parent loginFxml = FXMLLoader.load(getClass().getResource("Login.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("Login.fxml"));
         
-        Scene scene = new Scene(loginFxml);
+        Scene scene = new Scene(root);
         
         stage.setScene(scene);
         stage.show();
