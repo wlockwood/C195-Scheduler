@@ -6,6 +6,7 @@
 package scheduler;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -17,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;
 import javafx.scene.text.Text;
+import scheduler.Controllers.SchedulerDatabaseController;
 
 /**
  *
@@ -41,6 +43,8 @@ public class LoginController implements Initializable {
     @FXML
     private Button loginButton;
         
+    SchedulerDatabaseController sdb;
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         Locale here = Locale.getDefault();
@@ -52,12 +56,26 @@ public class LoginController implements Initializable {
     }    
 
     @FXML 
-    private void loginClick(ActionEvent event) {
-        System.out.println("Trying to log in...");
-        Alert badLogin = new Alert(Alert.AlertType.ERROR);
-        badLogin.setHeaderText("Login failed");
-        badLogin.setContentText(foundRb.getString("incorrectUsernameOrPassword"));
-        badLogin.show();
+    private void loginClick(ActionEvent event) throws SQLException {
+        String user = usernameTextbox.getText();
+        String pass = passwordField.getText();
+        System.out.println("Trying to log in as '" + user + "'...");
+        boolean successfulLogin = sdb.checkCredentials(user, pass);
+        if(successfulLogin)
+        {
+            System.out.println("Logged in successfully.");
+        }
+        else
+        {
+            Alert badLogin = new Alert(Alert.AlertType.ERROR);
+            badLogin.setContentText(foundRb.getString("incorrectUsernameOrPassword"));
+            badLogin.show();
+        }
+        
     }
     
+    public void construct(SchedulerDatabaseController _sdb)
+    {
+        sdb = _sdb;
+    }
 }
