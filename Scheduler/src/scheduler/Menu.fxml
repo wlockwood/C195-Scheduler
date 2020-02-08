@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane id="AnchorPane" prefHeight="155.0" prefWidth="184.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" fx:controller="scheduler.Controllers.MenuController">
+   <children>
+      <Button layoutX="26.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleCustomersClick" text="View / Edit Customers" />
+      <Button layoutX="46.0" layoutY="116.0" mnemonicParsing="false" onAction="#handleCalendarClick" text="View Calendar" />
+      <Button layoutX="16.0" layoutY="65.0" mnemonicParsing="false" onAction="#handleAppointClick" text="View / Edit Appointments" />
+   </children>
+</AnchorPane>

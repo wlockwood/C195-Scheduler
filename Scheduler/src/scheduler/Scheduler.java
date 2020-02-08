@@ -5,46 +5,34 @@
  */
 package scheduler;
 
-import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.Statement;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
+import scheduler.Controllers.LoginController;
 import java.sql.SQLException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import scheduler.Controllers.SchedulerDatabaseController;
+import scheduler.DataAccess.SchedulerDAL;
 
 
 
 public class Scheduler extends Application {
 
-    private SchedulerDatabaseController db;
+    private SchedulerDAL db;
     
     @Override
     public void start(Stage stage) throws Exception {
         
-        db = new SchedulerDatabaseController();
-        
+        db = new SchedulerDAL();
         
         FXMLLoader loginLoader = new FXMLLoader(getClass().getResource("Login.fxml"));
         Parent root = loginLoader.load();
         LoginController loginController = loginLoader.getController();
-        loginController.construct(db);
+        loginController.construct(db, stage);
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
-        
-        
     }
     
     @Override
