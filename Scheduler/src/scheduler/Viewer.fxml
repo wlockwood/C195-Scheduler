@@ -11,9 +11,11 @@
    <children>
       <TableView fx:id="customersTable" prefHeight="305.0" prefWidth="600.0">
         <columns>
-          <TableColumn prefWidth="75.0" text="C1" />
-          <TableColumn prefWidth="75.0" text="C2" />
-            <TableColumn prefWidth="75.0" text="Column X" />
+          <TableColumn fx:id="custIdCol" prefWidth="75.0" text="Id" />
+          <TableColumn fx:id="custNameCol" prefWidth="75.0" text="Name" />
+            <TableColumn fx:id="custAddrCol" prefWidth="75.0" text="Address" />
+            <TableColumn fx:id="custPhoneCol" prefWidth="75.0" text="Phone" />
+            <TableColumn fx:id="custActCol" prefWidth="75.0" text="Active" />
         </columns>
       </TableView>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="25.0">

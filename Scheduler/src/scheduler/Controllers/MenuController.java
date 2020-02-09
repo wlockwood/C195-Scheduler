@@ -2,6 +2,7 @@ package scheduler.Controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -29,13 +30,13 @@ public class MenuController implements Initializable {
     }
     
     @FXML
-    private void handleCustomersClick(ActionEvent event) {
+    private void handleCustomersClick(ActionEvent event) throws SQLException {
         System.out.println("Opening Customers window...");
         showViewer(ViewerController.ViewerMode.Customer);
     }
 
     @FXML
-    private void handleAppointClick(ActionEvent event) {
+    private void handleAppointClick(ActionEvent event) throws SQLException {
         System.out.println("Opening Appointments window...");
         showViewer(ViewerController.ViewerMode.Appointment);
     }
@@ -52,7 +53,7 @@ public class MenuController implements Initializable {
         stage = _stage;
     }
     
-    private void showViewer(ViewerController.ViewerMode mode)
+    private void showViewer(ViewerController.ViewerMode mode) throws SQLException
     {
         FXMLLoader editorLoader = new FXMLLoader(getClass().getResource("/scheduler/Viewer.fxml"));
         try
@@ -66,14 +67,8 @@ public class MenuController implements Initializable {
             Stage substage = new Stage();
             substage.setScene(scene);
             substage.initOwner(stage);
-          
             
             substage.show();
-            
-            
-            //Open in same window
-            //stage.setScene(scene);
-            //stage.show();    
         }
         catch (IOException ioe)
         {

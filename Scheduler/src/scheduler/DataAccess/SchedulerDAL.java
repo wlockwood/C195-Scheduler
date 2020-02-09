@@ -9,8 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import scheduler.Model.Address;
 import scheduler.Model.Customer;
 
 
@@ -77,10 +79,45 @@ public class SchedulerDAL {
         return result;
     }
     
-    public Set<Customer> getCustomers() throws SQLException
+    public ArrayList<Customer> getCustomers() throws SQLException
     {
-        ResultSet results = query("select * from customer");
-        Set<Customer> output = new HashSet<>();
+        ResultSet results = query("SELECT\n" +
+        "    C.customerId,\n" +
+        "    C.customerName,\n" +
+        "    C.active,\n" +
+        "    C.lastUpdate,\n" +
+        "    C.addressId,\n" +
+        "    A.address,\n" +
+        "    A.address2,\n" +
+        "    Cit.city,\n" +
+        "    A.postalCode,\n" +
+        "    Coun.country,\n" +
+        "    A.phone\n" +
+        "FROM U04SVR.customer C\n" +
+        "INNER JOIN address A ON C.addressId = A.addressId\n" +
+        "INNER JOIN city Cit ON A.cityId = Cit.cityId\n" +
+        "INNER JOIN country Coun ON Cit.countryId = Coun.countryId;");
+        ArrayList<Customer> output = new ArrayList<>();
+        while(results.next())
+        {
+            Address rowAddr = new Address(
+                    results.getInt("addressId"),
+                    results.getString("address"),
+                    results.getString("address2"),
+                    results.getString("city"),
+                    results.getString("country"),
+                    results.getString("postalCode"),
+                    results.getString("phone")
+            );
+            Customer rowCust = new Customer(
+                    results.getInt("customerId"),
+                    results.getString("customerName"),
+                    rowAddr,
+                    results.getBoolean("active"),
+                    results.getString("phone")
+            );
+            output.add(rowCust);
+        }
         return output;
     }
 }
