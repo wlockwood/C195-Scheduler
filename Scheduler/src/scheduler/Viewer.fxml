@@ -4,21 +4,38 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox id="VBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scheduler.Controllers.ViewerController">
+<VBox id="VBox" prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scheduler.Controllers.ViewerController">
    <children>
-      <TableView fx:id="customersTable" prefHeight="305.0" prefWidth="600.0">
-        <columns>
-          <TableColumn fx:id="custIdCol" prefWidth="75.0" text="Id" />
-          <TableColumn fx:id="custNameCol" prefWidth="75.0" text="Name" />
-            <TableColumn fx:id="custAddrCol" prefWidth="75.0" text="Address" />
-            <TableColumn fx:id="custPhoneCol" prefWidth="75.0" text="Phone" />
-            <TableColumn fx:id="custActCol" prefWidth="75.0" text="Active" />
-        </columns>
-      </TableView>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="25.0">
+      <AnchorPane>
+         <children>
+            <TableView fx:id="appointmentsTable" prefHeight="305.0" prefWidth="700.0">
+              <columns>
+                  <TableColumn fx:id="apptIdCol" prefWidth="25.0" text="Id" />
+                  <TableColumn fx:id="apptStartCol" prefWidth="125.0" text="Start" />
+                  <TableColumn fx:id="apptEndCol" prefWidth="125.0" text="End" />
+                  <TableColumn fx:id="apptTitleCol" prefWidth="100.0" text="Title" />
+                  <TableColumn fx:id="apptCustCol" prefWidth="100.0" text="Customer" />
+                  <TableColumn fx:id="apptLocationCol" prefWidth="100.0" text="Location" />
+                  <TableColumn fx:id="apptTypeCol" prefWidth="75.0" text="Type" />
+                  
+              </columns>
+            </TableView>
+            <TableView fx:id="customersTable" prefHeight="305.0" prefWidth="700.0">
+              <columns>
+                  <TableColumn fx:id="custIdCol" prefWidth="25.0" text="Id" />
+                  <TableColumn fx:id="custNameCol" prefWidth="100.0" text="Name" />
+                  <TableColumn fx:id="custAddrCol" prefWidth="200.0" text="Address" />
+                  <TableColumn fx:id="custPhoneCol" prefWidth="75.0" text="Phone" />
+                  <TableColumn fx:id="custActCol" prefWidth="75.0" text="Active" />
+              </columns>
+            </TableView>
+         </children>
+      </AnchorPane>
+      <HBox alignment="CENTER" prefHeight="86.0" prefWidth="642.0" spacing="25.0">
          <children>
             <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleAddClick" text="Add">
                <HBox.margin>

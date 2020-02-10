@@ -32,13 +32,13 @@ public class MenuController implements Initializable {
     @FXML
     private void handleCustomersClick(ActionEvent event) throws SQLException {
         System.out.println("Opening Customers window...");
-        showViewer(ViewerController.ViewerMode.Customer);
+        showViewer(ViewerController.TypeMode.Customer);
     }
 
     @FXML
     private void handleAppointClick(ActionEvent event) throws SQLException {
         System.out.println("Opening Appointments window...");
-        showViewer(ViewerController.ViewerMode.Appointment);
+        showViewer(ViewerController.TypeMode.Appointment);
     }
     
     @FXML
@@ -53,13 +53,13 @@ public class MenuController implements Initializable {
         stage = _stage;
     }
     
-    private void showViewer(ViewerController.ViewerMode mode) throws SQLException
+    private void showViewer(ViewerController.TypeMode mode) throws SQLException
     {
-        FXMLLoader editorLoader = new FXMLLoader(getClass().getResource("/scheduler/Viewer.fxml"));
+        FXMLLoader viewerLoader = new FXMLLoader(getClass().getResource("/scheduler/Viewer.fxml"));
         try
         {
-            Parent root = editorLoader.load();
-            ViewerController vc = editorLoader.getController();
+            Parent root = viewerLoader.load();
+            ViewerController vc = viewerLoader.getController();
             vc.construct(sdal, stage, mode);
 
             //Open in new window

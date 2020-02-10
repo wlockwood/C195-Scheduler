@@ -18,9 +18,7 @@ public class Customer {
         address = _address;
         active = _active;
         phone = _phone;
-        addressSquash = address.address + " " + address.address2
-                + ", " + address.city + " " + address.postalCode
-                + " " + address.country;
+        
     }
     
     private int customerId;
@@ -71,10 +69,9 @@ public class Customer {
     }
 
     public String getAddressSquash() {
-        return addressSquash;
+        return address.address + " " + address.address2
+                + ", " + address.city + " " + address.postalCode
+                + " " + address.country;
     }
 
-    public void setAddressSquash(String addressSquash) {
-        this.addressSquash = addressSquash;
-    }
 }

@@ -13,13 +13,13 @@ public class Address {
         phone = _phone;
     }
     
-    int addressId;
-    String address;
-    String address2;
-    String city;    //This should be a reference to a City object later.
-    String country;
-    String postalCode;
-    String phone;
+    public int addressId;
+    public String address;
+    public String address2;
+    public String city;    //This should be a reference to a City object later.
+    public String country;
+    public String postalCode;
+    public String phone;
     
     
 }
