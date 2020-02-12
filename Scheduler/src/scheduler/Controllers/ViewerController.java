@@ -111,12 +111,12 @@ public class ViewerController implements Initializable {
     }
 
     @FXML
-    private void handleAddClick(ActionEvent event) {
+    private void handleAddClick(ActionEvent event) throws SQLException, IOException {
         showCustomerAddEditWindow(false);
     }
 
     @FXML
-    private void handleEditClick(ActionEvent event) {
+    private void handleEditClick(ActionEvent event) throws SQLException, IOException {
         showCustomerAddEditWindow(true);
     }
 
@@ -141,7 +141,7 @@ public class ViewerController implements Initializable {
         }
     }
     
-    private void showCustomerAddEditWindow(boolean editing)
+    private void showCustomerAddEditWindow(boolean editing) throws SQLException, IOException
     {
         try
         {
@@ -167,7 +167,7 @@ public class ViewerController implements Initializable {
 
             substage.show();
         }
-        catch (Exception e)
+        catch (SQLException e)
         {
             Alert al = new Alert(Alert.AlertType.ERROR);
             al.setContentText("Unable to load Editor interface, details below.\n\n"

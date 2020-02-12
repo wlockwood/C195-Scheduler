@@ -28,6 +28,12 @@ public class Customer {
     private String phone;
     private String addressSquash;
 
+    public enum ActiveState
+    {
+        Active,
+        Inactive
+    }
+    
     public int getCustomerId() {
         return customerId;
     }
@@ -72,6 +78,24 @@ public class Customer {
         return address.address + " " + address.address2
                 + ", " + address.city + " " + address.postalCode
                 + " " + address.country;
+    }
+    
+    public ActiveState getVerboseActive()
+    {
+        if(active)
+        {
+            return ActiveState.Active;
+        }
+        else
+        {
+            return ActiveState.Inactive;
+        }
+    }
+    
+    public void setActive(ActiveState a)
+    {
+        if(a == ActiveState.Active) { active = true; }
+        else { active = false; }
     }
 
 }
