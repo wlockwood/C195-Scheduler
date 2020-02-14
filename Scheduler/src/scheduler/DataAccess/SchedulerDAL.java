@@ -10,7 +10,9 @@ import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import scheduler.Model.Address;
@@ -60,7 +62,7 @@ public class SchedulerDAL {
     public ResultSet parameterizedQuery(String queryString, String param1) throws SQLException
     {
         PreparedStatement prepared = db.prepareStatement(queryString);
-        prepared.setString(0, param1);
+        prepared.setString(1, param1);
         ResultSet result = prepared.executeQuery();
         return result;
     }
@@ -75,12 +77,21 @@ public class SchedulerDAL {
         return result;
     }
     
+    public ResultSet parameterizedQuery(String queryString, int param1) throws SQLException
+    {
+        PreparedStatement prepared = db.prepareStatement(queryString);
+        prepared.setInt(1, param1);
+        ResultSet result = prepared.executeQuery();
+        return result;
+    }
+    
     public ResultSet query(String queryString) throws SQLException
     {
         Statement statement = (Statement) db.createStatement();
         ResultSet result = statement.executeQuery(queryString);
         return result;
     }
+    
     
     //Adapted from https://stackoverflow.com/questions/696782/retrieve-column-names-from-java-sql-resultset
     public void printColumnNamesInResult(ResultSet input) throws SQLException
@@ -143,8 +154,7 @@ public class SchedulerDAL {
                     dbRow.getInt("customerId"),
                     dbRow.getString("customerName"),
                     extractAddress(dbRow),
-                    dbRow.getBoolean("active"),
-                    dbRow.getString("phone")
+                    dbRow.getBoolean("active")
             );
         return output;
     }
@@ -214,4 +224,119 @@ public class SchedulerDAL {
     public void deleteAppointment(int appointmentId) {
         System.out.println("Let's pretend we just deleted an appointment.");
     }
+
+    public void addCustomer(Customer newCust) {
+        ResultSet results = query("SELECT addressId\n" +
+            "FROM address\n" +
+            "WHERE address.addressId = ?\n" +
+            "LIMIT 1;");
+        
+
+        //Write address
+        
+        //Write customer
+        
+    }
+
+    public int getAddressIdWithInsert(Address addr) throws SQLException
+    {
+        //See if addressId exists
+        ResultSet results = parameterizedQuery("SELECT addressId\n" +
+            "FROM address\n" +
+            "WHERE address.addressId = ?\n" +
+            "LIMIT 1;", addr.addressId);
+        if(results.next())
+        {
+            return results.getInt("addressId");
+        }
+
+
+        //Make sure city exists and get code
+        int cityId = getCityIdWithInsert(addr.city, addr.country);
+        
+        //Now timestamp in UTC
+        Instant now = Instant.now();
+        java.sql.Date nowDate = (java.sql.Date) Date.from(now);
+        
+        String sql = "INSERT INTO address (address1, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy)\n" +
+            "Values (?,?,?,?,?,?,?,?,?)";
+        PreparedStatement preps = db.prepareStatement(sql);
+        preps.setString(1, addr.address);
+        preps.setString(2, addr.address2);
+        preps.setInt(3, cityId);
+        preps.setString(4, addr.postalCode);
+        preps.setString(5, addr.phone);
+        preps.setDate(6, nowDate);
+        preps.setString(7, userName);
+        preps.setDate(8, nowDate);
+        preps.setString(9, userName);
+        preps.execute();
+        
+        return getAddressIdWithInsert(addr);
+        
+    }
+    
+    public void updateCustomer(Customer formCust) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public int getCountryIdWithInsert(String countryName) throws SQLException
+    {
+        ResultSet results = parameterizedQuery("SELECT countryId\n" +
+            "FROM country\n" +
+            "WHERE country.country = ?\n" +
+            "LIMIT 1;", countryName);
+        if(results.next())
+        {
+            return results.getInt("countryId");
+        }
+
+        String sql = "INSERT INTO country (country, createDate, createdBy, lastUpdate, lastUpdateBy)\n" +
+            "VALUES (?,?,?,?,?)";
+        Instant now = Instant.now();
+        java.sql.Date nowDate = (java.sql.Date) Date.from(now);
+        PreparedStatement preps = db.prepareStatement(sql);
+        preps.setString(1, countryName);
+        preps.setDate(2, nowDate);
+        preps.setString(3, userName);
+        preps.setDate(4, nowDate);
+        preps.setString(5, userName);
+        preps.execute();
+        System.out.println("Couldn't find country '" + countryName + "', created.");
+        return getCountryIdWithInsert(countryName);
+        
+    }
+
+    private int getCityIdWithInsert(String city, String country) throws SQLException {
+        ResultSet results = parameterizedQuery("SELECT cityId FROM city\n" +
+            "INNER JOIN country ON city.countryId = country.countryId\n" +
+            "WHERE city.city = ? AND country.country = ?", city, country);
+        if(results.next())
+        {
+            return results.getInt("cityId");
+        }
+        
+        //Insert new city
+        int countryId = getCountryIdWithInsert(country);
+
+        Instant now = Instant.now();
+        java.sql.Date nowDate = (java.sql.Date) Date.from(now);
+
+        String sql = "INSERT INTO city (city, countryId, createDate, createdBy, lastUpdate, lastUpdateBy)\n" +
+            "VALUES (?,?,?,?,?)";
+        PreparedStatement preps = db.prepareStatement(sql);
+
+        preps.setString(1, city);
+        preps.setInt(2, countryId);
+        preps.setDate(4, nowDate);
+        preps.setString(5, userName);
+        preps.setDate(6, nowDate);
+        preps.setString(7, userName);
+        preps.execute();
+
+
+       return getCityIdWithInsert(city, country);
+     }
+    
+    
 }

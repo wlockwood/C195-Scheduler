@@ -11,13 +11,12 @@ package scheduler.Model;
  */
 public class Customer {
     public Customer(int id, String _name, 
-            Address _address, boolean _active, String _phone)
+            Address _address, boolean _active)
     {
         customerId = id;
         name = _name;
         address = _address;
         active = _active;
-        phone = _phone;
         
     }
     
@@ -25,7 +24,6 @@ public class Customer {
     private String name;
     private Address address;
     private boolean active;
-    private String phone;
     private String addressSquash;
 
     public enum ActiveState
@@ -64,14 +62,6 @@ public class Customer {
 
     public void setActive(boolean active) {
         this.active = active;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public String getAddressSquash() {

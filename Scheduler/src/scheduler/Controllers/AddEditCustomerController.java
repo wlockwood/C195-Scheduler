@@ -9,14 +9,19 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import scheduler.DataAccess.SchedulerDAL;
 import scheduler.Model.Address;
 import scheduler.Model.Customer;
@@ -58,6 +63,7 @@ public class AddEditCustomerController implements Initializable {
         if(editingCust == null)
         {
             addEditButton.setText("Add customer");
+            activeCombo.getSelectionModel().select(Customer.ActiveState.Active);
         }
         else 
         {
@@ -75,5 +81,73 @@ public class AddEditCustomerController implements Initializable {
             phoneField.setText(custAddr.phone);
         }
     }
+
+    @FXML
+    private void addEditClick(ActionEvent event) {
+        
+        //Either way, all fields except address 2 are required
+        if(!isFormValid())
+        {
+            new Alert(Alert.AlertType.ERROR,"All fields except address 2 are required. Phone must be formatted like a phone number.").show();
+            return;
+        }
+        
+        //Create model objects
+            Address ad = new Address(
+                0,
+                addressField.getText(),
+                address2Field.getText(),
+                cityField.getText(),
+                countryField.getText(),
+                postalField.getText(),
+                phoneField.getText()
+            );
+        
+            boolean active = activeCombo.getSelectionModel().getSelectedItem() == Customer.ActiveState.Active;
+            Customer formCust = new Customer(
+                   0,
+                   nameField.getText(),
+                   ad,
+                   active
+            );  
+            
+        if(editingCust == null)
+        {
+            //Add customer
+            sdal.addCustomer(formCust);
+        }
+        else 
+        {
+            //Save customer updates
+            formCust.getAddress().addressId = editingCust.getAddress().addressId;
+            formCust.setCustomerId(editingCust.getCustomerId());
+            sdal.updateCustomer(formCust);
+        }
+    }
     
+    private boolean isFormValid()
+    {
+        if("".equals(nameField.getText()) || nameField.getText() == null) { return false; }
+        if("".equals(addressField.getText()) || addressField.getText() == null) { return false; }
+        //Ignore address2
+        if("".equals(cityField.getText()) || cityField.getText() == null) { return false; }
+        if("".equals(postalField.getText()) || postalField.getText() == null) { return false; }
+        if("".equals(countryField.getText()) || countryField.getText() == null) { return false; }
+        if("".equals(phoneField.getText()) || phoneField.getText() == null) { return false; }
+        
+        
+        //Check that phone number looks like a phone number
+        //Regex from http://regexlib.com/Search.aspx?k=phone, flow from https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
+        Pattern pat = Pattern.compile("^(\\(?\\+?[0-9]*\\)?)?[0-9_\\- \\(\\)]*$");
+        Matcher m = pat.matcher(phoneField.getText());
+        
+        boolean matches = m.matches();
+        if(!matches) 
+        {
+            return false;
+        }
+            
+        
+        return true;
+    }
 }

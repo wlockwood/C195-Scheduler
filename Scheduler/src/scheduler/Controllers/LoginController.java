@@ -62,11 +62,13 @@ public class LoginController implements Initializable {
     private void loginClick(ActionEvent event) throws SQLException, IOException {
         
         
+        showMainMenu();
+        
         String user = usernameTextbox.getText();
         String pass = passwordField.getText();
         System.out.println("Trying to log in as '" + user + "'...");
         boolean successfulLogin = sdal.checkCredentials(user, pass);
-        
+                
         if(successfulLogin)
         {
             showMainMenu();
