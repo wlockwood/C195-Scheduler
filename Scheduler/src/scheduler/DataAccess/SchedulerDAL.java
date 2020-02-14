@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -225,16 +226,39 @@ public class SchedulerDAL {
         System.out.println("Let's pretend we just deleted an appointment.");
     }
 
-    public void addCustomer(Customer newCust) {
-        ResultSet results = query("SELECT addressId\n" +
-            "FROM address\n" +
-            "WHERE address.addressId = ?\n" +
-            "LIMIT 1;");
-        
+    public void addCustomer(Customer newCust) throws SQLException {
+        try
+        {
+            db.setAutoCommit(false);    //Must be disabled start a transaction
+            
+            int addressId = getAddressIdWithInsert(newCust.getAddress());
+            
+            //Write customer
+            String sql = "INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdateBy)\n" +
+                "Values (?,?,?,?,?,?)";
+            PreparedStatement preps = db.prepareStatement(sql);
 
-        //Write address
-        
-        //Write customer
+            
+            preps.setString(1, newCust.getName());
+            preps.setInt(2, addressId);
+            preps.setBoolean(3, newCust.isActive());
+            Instant now = Instant.now();
+            preps.setTimestamp(4, Timestamp.from(now));
+            preps.setString(5, userName);
+            preps.setString(6, userName);
+            preps.execute();
+            
+            db.commit();
+        }
+        catch (SQLException se)
+        {
+            db.rollback();
+            throw se;
+        }
+        finally
+        {
+            db.setAutoCommit(true);
+        }
         
     }
 
@@ -254,22 +278,18 @@ public class SchedulerDAL {
         //Make sure city exists and get code
         int cityId = getCityIdWithInsert(addr.city, addr.country);
         
-        //Now timestamp in UTC
-        Instant now = Instant.now();
-        java.sql.Date nowDate = (java.sql.Date) Date.from(now);
-        
-        String sql = "INSERT INTO address (address1, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy)\n" +
-            "Values (?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO address (address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdateBy)\n" +
+            "Values (?,?,?,?,?,?,?,?)";
         PreparedStatement preps = db.prepareStatement(sql);
         preps.setString(1, addr.address);
         preps.setString(2, addr.address2);
         preps.setInt(3, cityId);
         preps.setString(4, addr.postalCode);
         preps.setString(5, addr.phone);
-        preps.setDate(6, nowDate);
+        Instant now = Instant.now();
+        preps.setTimestamp(6, Timestamp.from(now));
         preps.setString(7, userName);
-        preps.setDate(8, nowDate);
-        preps.setString(9, userName);
+        preps.setString(8, userName);
         preps.execute();
         
         return getAddressIdWithInsert(addr);
@@ -291,22 +311,23 @@ public class SchedulerDAL {
             return results.getInt("countryId");
         }
 
-        String sql = "INSERT INTO country (country, createDate, createdBy, lastUpdate, lastUpdateBy)\n" +
-            "VALUES (?,?,?,?,?)";
-        Instant now = Instant.now();
-        java.sql.Date nowDate = (java.sql.Date) Date.from(now);
+        String sql = "INSERT INTO country (country, createDate, createdBy, lastUpdateBy)\n" +
+            "VALUES (?,?,?,?)";
+
+      
         PreparedStatement preps = db.prepareStatement(sql);
         preps.setString(1, countryName);
-        preps.setDate(2, nowDate);
+        Instant now = Instant.now();
+        preps.setTimestamp(2, Timestamp.from(now));
         preps.setString(3, userName);
-        preps.setDate(4, nowDate);
-        preps.setString(5, userName);
+        preps.setString(4, userName);
         preps.execute();
         System.out.println("Couldn't find country '" + countryName + "', created.");
         return getCountryIdWithInsert(countryName);
         
     }
 
+    //Insufficient resolution for real-world use. Ex: there are many Portlands in the US.
     private int getCityIdWithInsert(String city, String country) throws SQLException {
         ResultSet results = parameterizedQuery("SELECT cityId FROM city\n" +
             "INNER JOIN country ON city.countryId = country.countryId\n" +
@@ -319,19 +340,16 @@ public class SchedulerDAL {
         //Insert new city
         int countryId = getCountryIdWithInsert(country);
 
-        Instant now = Instant.now();
-        java.sql.Date nowDate = (java.sql.Date) Date.from(now);
-
-        String sql = "INSERT INTO city (city, countryId, createDate, createdBy, lastUpdate, lastUpdateBy)\n" +
+        String sql = "INSERT INTO city (city, countryId, createDate, createdBy, lastUpdateBy)\n" +
             "VALUES (?,?,?,?,?)";
         PreparedStatement preps = db.prepareStatement(sql);
 
         preps.setString(1, city);
         preps.setInt(2, countryId);
-        preps.setDate(4, nowDate);
+        Instant now = Instant.now();
+        preps.setTimestamp(3, Timestamp.from(now));
+        preps.setString(4, userName);
         preps.setString(5, userName);
-        preps.setDate(6, nowDate);
-        preps.setString(7, userName);
         preps.execute();
 
 

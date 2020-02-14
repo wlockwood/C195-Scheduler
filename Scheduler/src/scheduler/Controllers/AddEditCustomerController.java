@@ -83,7 +83,7 @@ public class AddEditCustomerController implements Initializable {
     }
 
     @FXML
-    private void addEditClick(ActionEvent event) {
+    private void addEditClick(ActionEvent event) throws SQLException {
         
         //Either way, all fields except address 2 are required
         if(!isFormValid())
