@@ -280,7 +280,7 @@ public class SchedulerDAL {
         
         String sql = "INSERT INTO address (address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdateBy)\n" +
             "Values (?,?,?,?,?,?,?,?)";
-        PreparedStatement preps = db.prepareStatement(sql);
+        PreparedStatement preps = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         preps.setString(1, addr.address);
         preps.setString(2, addr.address2);
         preps.setInt(3, cityId);
@@ -292,7 +292,11 @@ public class SchedulerDAL {
         preps.setString(8, userName);
         preps.execute();
         
-        return getAddressIdWithInsert(addr);
+        //Get new Id - from https://stackoverflow.com/questions/14170656/get-last-inserted-auto-increment-id-in-mysql
+        ResultSet keys = preps.getGeneratedKeys();    
+        keys.next();  
+        int key = keys.getInt(1);
+        return key;
         
     }
     
@@ -308,14 +312,16 @@ public class SchedulerDAL {
             "LIMIT 1;", countryName);
         if(results.next())
         {
-            return results.getInt("countryId");
+            int output = results.getInt("countryId");
+            System.out.println("Country '" + countryName + "' is Id " + output + ".");
+            return output;
         }
-
+        System.out.println("Couldn't find country '" + countryName + "', creating....");
         String sql = "INSERT INTO country (country, createDate, createdBy, lastUpdateBy)\n" +
             "VALUES (?,?,?,?)";
 
       
-        PreparedStatement preps = db.prepareStatement(sql);
+        PreparedStatement preps = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         preps.setString(1, countryName);
         Instant now = Instant.now();
         preps.setTimestamp(2, Timestamp.from(now));
@@ -323,7 +329,12 @@ public class SchedulerDAL {
         preps.setString(4, userName);
         preps.execute();
         System.out.println("Couldn't find country '" + countryName + "', created.");
-        return getCountryIdWithInsert(countryName);
+        
+        
+        ResultSet keys = preps.getGeneratedKeys();    
+        keys.next();  
+        int key = keys.getInt(1);
+        return key;
         
     }
 
@@ -342,7 +353,7 @@ public class SchedulerDAL {
 
         String sql = "INSERT INTO city (city, countryId, createDate, createdBy, lastUpdateBy)\n" +
             "VALUES (?,?,?,?,?)";
-        PreparedStatement preps = db.prepareStatement(sql);
+        PreparedStatement preps = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
         preps.setString(1, city);
         preps.setInt(2, countryId);
@@ -353,7 +364,10 @@ public class SchedulerDAL {
         preps.execute();
 
 
-       return getCityIdWithInsert(city, country);
+       ResultSet keys = preps.getGeneratedKeys();    
+        keys.next();  
+        int key = keys.getInt(1);
+        return key;
      }
     
     

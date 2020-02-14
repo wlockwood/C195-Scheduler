@@ -36,6 +36,8 @@ public class AddEditCustomerController implements Initializable {
     SchedulerDAL sdal;
     Stage stage;
     Customer editingCust;
+    Customer returnedCustomer;
+    
     @FXML private TextField nameField;
     @FXML private ComboBox activeCombo;
     @FXML private TextField addressField;
@@ -115,6 +117,7 @@ public class AddEditCustomerController implements Initializable {
         {
             //Add customer
             sdal.addCustomer(formCust);
+            
         }
         else 
         {
@@ -123,6 +126,9 @@ public class AddEditCustomerController implements Initializable {
             formCust.setCustomerId(editingCust.getCustomerId());
             sdal.updateCustomer(formCust);
         }
+        
+        returnedCustomer = editingCust;
+        stage.close();
     }
     
     private boolean isFormValid()
