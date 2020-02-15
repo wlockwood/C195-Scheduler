@@ -173,8 +173,8 @@ public class SchedulerDAL {
             dbRow.getString("contact"),
             dbRow.getString("type"),
             dbRow.getString("url"),
-            dbRow.getTimestamp("start"),
-            dbRow.getTimestamp("end")
+            dbRow.getTimestamp("start").toInstant(),
+            dbRow.getTimestamp("end").toInstant()
             );
     }
     
@@ -396,6 +396,14 @@ public class SchedulerDAL {
         int key = keys.getInt(1);
         return key;
      }
+
+    public void updateAppointment(Appointment formAppoint) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public int addAppointment(Appointment formAppoint) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     
 }

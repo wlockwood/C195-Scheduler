@@ -28,21 +28,19 @@ import scheduler.DataAccess.SchedulerDAL;
 import scheduler.Model.Appointment;
 import scheduler.Model.Customer;
 
-
-
 public class ViewerController implements Initializable {
 
     SchedulerDAL sdal;
     Stage stage;
     TypeMode mode;
-    @FXML private TableView<Customer> customersTable;
+    @FXML
+    private TableView<Customer> customersTable;
     @FXML private TableColumn<Customer, Integer> custIdCol;
     @FXML private TableColumn<Customer, String> custNameCol;
     @FXML private TableColumn<Customer, String> custAddrCol;
     @FXML private TableColumn<Customer, String> custPhoneCol;
     @FXML private TableColumn<Customer, Boolean> custActCol;
-    @FXML
-    private TableView<Appointment> appointmentsTable;
+    @FXML private TableView<Appointment> appointmentsTable;
     @FXML private TableColumn<Appointment, Integer> apptIdCol;
     @FXML private TableColumn<Appointment, Timestamp> apptStartCol;
     @FXML private TableColumn<Appointment, Timestamp> apptEndCol;
@@ -50,24 +48,22 @@ public class ViewerController implements Initializable {
     @FXML private TableColumn<Appointment, String> apptTitleCol;
     @FXML private TableColumn<Appointment, String> apptLocationCol;
     @FXML private TableColumn<Appointment, String> apptTypeCol;
-    
+
     @Override
-    public void initialize(URL url, ResourceBundle rb) {}
-    
-    public void construct(SchedulerDAL _sdal, Stage _stage, TypeMode _mode) throws IOException, SQLException
-    {
+    public void initialize(URL url, ResourceBundle rb) {
+    }
+
+    public void construct(SchedulerDAL _sdal, Stage _stage, TypeMode _mode) throws IOException, SQLException {
         sdal = _sdal;
         stage = _stage;
         mode = _mode;
-        
+
         customersTable.setVisible(false);
         appointmentsTable.setVisible(false);
-        
-        if(mode == TypeMode.Customer)
-        {
+
+        if (mode == TypeMode.Customer) {
             //Get customers from DB
             ArrayList<Customer> customers = sdal.getCustomers();
-
 
             //Load customers into tableview
             SimpleListProperty<Customer> custProperty = new SimpleListProperty<>();
@@ -79,15 +75,11 @@ public class ViewerController implements Initializable {
             custAddrCol.setCellValueFactory(new PropertyValueFactory<>("addressSquash"));
             custPhoneCol.setCellValueFactory(new PropertyValueFactory<>("phone"));
             custActCol.setCellValueFactory(new PropertyValueFactory<>("active"));
-            
-            
+
             customersTable.setVisible(true);
-        }
-        else if (mode == TypeMode.Appointment)
-        {
+        } else if (mode == TypeMode.Appointment) {
             //Get appointments from DB
             ArrayList<Appointment> appointments = sdal.getAppointments();
-
 
             //Load customers into tableview
             SimpleListProperty<Appointment> apptProperty = new SimpleListProperty<>();
@@ -101,69 +93,60 @@ public class ViewerController implements Initializable {
             apptTitleCol.setCellValueFactory(new PropertyValueFactory<>("location"));
             apptLocationCol.setCellValueFactory(new PropertyValueFactory<>("contact"));
             apptTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
-            
-            
+
             appointmentsTable.setVisible(true);
-        }
-        else 
-        {
+        } else {
             new Alert(AlertType.ERROR, "Invalid TypeMode detected in on Viewer load.")
                     .show();
         }
-        
 
     }
 
     @FXML
     private void handleAddClick(ActionEvent event) throws SQLException, IOException {
-        Stage myStage = (Stage)((Node) event.getSource()).getScene().getWindow();
-        showCustomerAddEditWindow(false, myStage);
+        Stage myStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        if(mode == TypeMode.Customer) { showCustomerAddEditWindow(false, myStage); }
+        else { showAppointmentAddEditWindow(false, myStage); }
+        
     }
 
     @FXML
     private void handleEditClick(ActionEvent event) throws SQLException, IOException {
-        Stage myStage = (Stage)((Node) event.getSource()).getScene().getWindow();
-        showCustomerAddEditWindow(true, myStage);
+        Stage myStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        if(mode == TypeMode.Customer) { showCustomerAddEditWindow(true, myStage);}
+        else { showAppointmentAddEditWindow(true, myStage); }
     }
 
     @FXML
     private void handleDeleteClick(ActionEvent event) {
-        Stage myStage = (Stage)((Node) event.getSource()).getScene().getWindow();
-        
-        if(mode == TypeMode.Customer)
-        {
+        Stage myStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+        if (mode == TypeMode.Customer) {
             Customer selectedCustomer = customersTable.getSelectionModel().getSelectedItem();
             sdal.deleteCustomer(selectedCustomer.getCustomerId());
             customersTable.itemsProperty().get().remove(selectedCustomer);
-        }
-        else if(mode == TypeMode.Appointment)
-        {
+        } else if (mode == TypeMode.Appointment) {
             Appointment selectedAppointment = appointmentsTable.getSelectionModel().getSelectedItem();
             sdal.deleteAppointment(selectedAppointment.getAppointmentId());
-            customersTable.itemsProperty().get().remove(selectedAppointment);
-        }
-        else 
-        {
+            appointmentsTable.itemsProperty().get().remove(selectedAppointment);
+        } else {
             new Alert(AlertType.ERROR, "Invalid TypeMode detected in delete handler.")
                     .show();
         }
     }
-    
-    private void showCustomerAddEditWindow(boolean editing, Stage owningStage) throws SQLException, IOException
-    {
-        try
-        {
+
+    private void showCustomerAddEditWindow(boolean editing, Stage owningStage) throws SQLException, IOException {
+        try {
             FXMLLoader editorLoader = new FXMLLoader(getClass().getResource("/scheduler/AddEditCustomer.fxml"));
             Parent root = editorLoader.load();
             AddEditCustomerController vc = editorLoader.getController();
-            if(editing)
-            {
+            if (editing) {
                 Customer selected = customersTable.getSelectionModel().getSelectedItem();
-                if(selected == null) { return; }
+                if (selected == null) {
+                    return;
+                }
                 vc.construct(sdal, stage, selected);
-            }
-            else
-            {
+            } else {
                 vc.construct(sdal, stage, null);
             }
 
@@ -175,80 +158,99 @@ public class ViewerController implements Initializable {
             stage.initOwner(owningStage);
             stage.setScene(scene);
             stage.showAndWait();
-            
+
             //After return add new customer or update view
             ObservableList<Customer> custs = customersTable.itemsProperty().getValue();
-            int indexOfCust = -1;
-            for(int i = 0; i < custs.size(); i++)
+
+            if (vc.returnedCustomer != null) //This happens if the user closes the window without doing saving
             {
-                if(custs.get(i).getCustomerId() == vc.returnedCustomer.getCustomerId())
+                //Search for the modified item in the customer table
+                int indexOfCust = -1;
+                for (int i = 0; i < custs.size(); i++) {
+                    if (custs.get(i).getCustomerId() == vc.returnedCustomer.getCustomerId()) {
+                        indexOfCust = i;
+                        break;
+                    }
+                }
+
+                if (indexOfCust >= 0) //If it's already in the list...
                 {
-                    indexOfCust = i;
-                    break;
+                    //Should cause notification
+                    custs.set(indexOfCust, null);
+                    custs.set(indexOfCust, vc.returnedCustomer);
+                } else //If it wasn't in the list
+                {
+                    custs.add(vc.returnedCustomer);
                 }
             }
-            
-            if(indexOfCust >= 0)    //If it's already in the list...
-            {
-                //Should cause notification
-                custs.set(indexOfCust, null);
-                custs.set(indexOfCust, vc.returnedCustomer);
-            }    
-            else    //If it wasn't in the list
-            {
-                custs.add(vc.returnedCustomer);
-            }
-            
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             Alert al = new Alert(Alert.AlertType.ERROR);
             al.setContentText("Unable to load Editor interface, details below.\n\n"
-             + e.getLocalizedMessage());
+                    + e.getLocalizedMessage());
             al.show();
         }
     }
-        
-    private void showAppointmentAddEditWindow(boolean editing) throws SQLException
-    {
-        
-        try
-        {
+
+    private void showAppointmentAddEditWindow(boolean editing, Stage owningStage) throws SQLException, IOException {
+        try {
             FXMLLoader editorLoader = new FXMLLoader(getClass().getResource("/scheduler/AddEditAppoint.fxml"));
             Parent root = editorLoader.load();
             AddEditAppointController vc = editorLoader.getController();
-            if(editing)
-            {
+            if (editing) {
                 Appointment selected = appointmentsTable.getSelectionModel().getSelectedItem();
+                if (selected == null) {
+                    return;
+                }
                 vc.construct(sdal, stage, selected);
-            }
-            else
-            {
+            } else {
                 vc.construct(sdal, stage, null);
             }
 
-            
-            
             //Open in new window
             Scene scene = new Scene(root);
-            Stage substage = new Stage();
-            substage.setScene(scene);
-            substage.initOwner(stage);
 
-            substage.show();
-        }
-        catch (IOException ioe)
-        {
+            Stage stage = new Stage();
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(owningStage);
+            stage.setScene(scene);
+            stage.showAndWait();
+
+            //After return add new customer or update view
+            ObservableList<Appointment> appoints = appointmentsTable.itemsProperty().getValue();
+
+            if (vc.returnedAppoint != null) //This happens if the user closes the window without doing saving
+            {
+                //Search for the modified item in the customer table
+                //Lambda? appoints.stream().filter(x -> x.getAppointmentId() == vc.returnedAppoint.getAppointmentId()).findFirst();
+                
+                int indexOfA = -1;
+                for (int i = 0; i < appoints.size(); i++) {
+                    if (appoints.get(i).getAppointmentId() == vc.returnedAppoint.getAppointmentId()) {
+                        indexOfA = i;
+                        break;
+                    }
+                }
+
+                if (indexOfA >= 0) //If it's already in the list...
+                {
+                    //Should cause notification
+                    appoints.set(indexOfA, null);
+                    appoints.set(indexOfA, vc.returnedAppoint);
+                } else //If it wasn't in the list
+                {
+                    appoints.add(vc.returnedAppoint);
+                }
+            }
+        } catch (SQLException e) {
             Alert al = new Alert(Alert.AlertType.ERROR);
-            al.setContentText("Unable to load Editor interface.");
+            al.setContentText("Unable to load Editor interface, details below.\n\n"
+                    + e.getLocalizedMessage());
             al.show();
         }
     }
 
+    enum TypeMode {
 
-            
-    enum TypeMode
-    {
         Appointment,
         Customer
     }

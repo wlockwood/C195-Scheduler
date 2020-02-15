@@ -12,12 +12,12 @@ public class Appointment {
     private String contact;
     private String type;
     private String url;
-    private Timestamp start;
-    private Timestamp end;
+    private Instant start;
+    private Instant end;
 
     public Appointment(int _apptId, Customer _cust, String _title, String _desc,
             String _loc, String _contact, String _type, String _url, 
-            Timestamp _start, Timestamp _stop)
+            Instant _start, Instant _stop)
     {
         appointmentId = _apptId;
         customer = _cust;
@@ -95,19 +95,19 @@ public class Appointment {
         this.url = url;
     }
 
-    public Timestamp getStart() {
+    public Instant getStart() {
         return start;
     }
 
-    public void setStart(Timestamp start) {
+    public void setStart(Instant start) {
         this.start = start;
     }
 
-    public Timestamp getStop() {
+    public Instant getStop() {
         return end;
     }
 
-    public void setStop(Timestamp stop) {
+    public void setStop(Instant stop) {
         this.end = stop;
     }
 }
