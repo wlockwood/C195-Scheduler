@@ -19,7 +19,6 @@ import java.util.Set;
 import scheduler.Model.Address;
 import scheduler.Model.Appointment;
 import scheduler.Model.Customer;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 
 public class SchedulerDAL {
@@ -226,7 +225,7 @@ public class SchedulerDAL {
         System.out.println("Let's pretend we just deleted an appointment.");
     }
 
-    public void addCustomer(Customer newCust) throws SQLException {
+    public int addCustomer(Customer newCust) throws SQLException {
         try
         {
             db.setAutoCommit(false);    //Must be disabled start a transaction
@@ -236,7 +235,7 @@ public class SchedulerDAL {
             //Write customer
             String sql = "INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdateBy)\n" +
                 "Values (?,?,?,?,?,?)";
-            PreparedStatement preps = db.prepareStatement(sql);
+            PreparedStatement preps = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             
             preps.setString(1, newCust.getName());
@@ -248,7 +247,12 @@ public class SchedulerDAL {
             preps.setString(6, userName);
             preps.execute();
             
+            ResultSet keys = preps.getGeneratedKeys();    
+            keys.next();  
+            int key = keys.getInt(1);
+            
             db.commit();
+            return key;
         }
         catch (SQLException se)
         {
@@ -273,7 +277,6 @@ public class SchedulerDAL {
         {
             return results.getInt("addressId");
         }
-
 
         //Make sure city exists and get code
         int cityId = getCityIdWithInsert(addr.city, addr.country);
@@ -300,8 +303,32 @@ public class SchedulerDAL {
         
     }
     
-    public void updateCustomer(Customer formCust) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void updateCustomer(Customer cust) throws SQLException {
+        //Check address
+        int adId = getAddressIdWithInsert(cust.getAddress());
+
+        //Write customer
+        String sql = "UPDATE customer \n" +
+            "SET \n" +
+            "	customerName = ?, \n" +
+            "	addressId = ?, \n" +
+            "    active = ?, \n" +
+            "    createDate = ?, \n" +
+            "    createdBy = ?, \n" +
+            "    lastUpdateBy = ?\n" +
+            "WHERE\n" +
+            "	customerId = ?";
+        PreparedStatement preps = db.prepareStatement(sql);
+
+        preps.setString(1, cust.getName());
+        preps.setInt(2, adId);
+        preps.setBoolean(3, cust.isActive());
+        Instant now = Instant.now();
+        preps.setTimestamp(4, Timestamp.from(now));
+        preps.setString(5, userName);
+        preps.setString(6, userName);
+        preps.setInt(7, cust.getCustomerId());
+        preps.execute();
     }
     
     public int getCountryIdWithInsert(String countryName) throws SQLException

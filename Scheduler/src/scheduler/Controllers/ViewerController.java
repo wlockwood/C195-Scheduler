@@ -5,13 +5,16 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -19,6 +22,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import scheduler.DataAccess.SchedulerDAL;
 import scheduler.Model.Appointment;
@@ -112,16 +116,20 @@ public class ViewerController implements Initializable {
 
     @FXML
     private void handleAddClick(ActionEvent event) throws SQLException, IOException {
-        showCustomerAddEditWindow(false);
+        Stage myStage = (Stage)((Node) event.getSource()).getScene().getWindow();
+        showCustomerAddEditWindow(false, myStage);
     }
 
     @FXML
     private void handleEditClick(ActionEvent event) throws SQLException, IOException {
-        showCustomerAddEditWindow(true);
+        Stage myStage = (Stage)((Node) event.getSource()).getScene().getWindow();
+        showCustomerAddEditWindow(true, myStage);
     }
 
     @FXML
     private void handleDeleteClick(ActionEvent event) {
+        Stage myStage = (Stage)((Node) event.getSource()).getScene().getWindow();
+        
         if(mode == TypeMode.Customer)
         {
             Customer selectedCustomer = customersTable.getSelectionModel().getSelectedItem();
@@ -141,7 +149,7 @@ public class ViewerController implements Initializable {
         }
     }
     
-    private void showCustomerAddEditWindow(boolean editing) throws SQLException, IOException
+    private void showCustomerAddEditWindow(boolean editing, Stage owningStage) throws SQLException, IOException
     {
         try
         {
@@ -161,11 +169,36 @@ public class ViewerController implements Initializable {
 
             //Open in new window
             Scene scene = new Scene(root);
-            Stage substage = new Stage();
-            substage.setScene(scene);
-            substage.initOwner(stage);
 
-            substage.show();
+            Stage stage = new Stage();
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(owningStage);
+            stage.setScene(scene);
+            stage.showAndWait();
+            
+            //After return add new customer or update view
+            ObservableList<Customer> custs = customersTable.itemsProperty().getValue();
+            int indexOfCust = -1;
+            for(int i = 0; i < custs.size(); i++)
+            {
+                if(custs.get(i).getCustomerId() == vc.returnedCustomer.getCustomerId())
+                {
+                    indexOfCust = i;
+                    break;
+                }
+            }
+            
+            if(indexOfCust >= 0)    //If it's already in the list...
+            {
+                //Should cause notification
+                custs.set(indexOfCust, null);
+                custs.set(indexOfCust, vc.returnedCustomer);
+            }    
+            else    //If it wasn't in the list
+            {
+                custs.add(vc.returnedCustomer);
+            }
+            
         }
         catch (SQLException e)
         {
@@ -193,8 +226,9 @@ public class ViewerController implements Initializable {
             {
                 vc.construct(sdal, stage, null);
             }
-            
 
+            
+            
             //Open in new window
             Scene scene = new Scene(root);
             Stage substage = new Stage();
@@ -209,8 +243,6 @@ public class ViewerController implements Initializable {
             al.setContentText("Unable to load Editor interface.");
             al.show();
         }
-
-        
     }
 
 

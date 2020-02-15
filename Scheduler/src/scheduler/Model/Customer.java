@@ -87,5 +87,10 @@ public class Customer {
         if(a == ActiveState.Active) { active = true; }
         else { active = false; }
     }
+    
+    public String getPhone()
+    {
+        return address.phone;
+    }
 
 }

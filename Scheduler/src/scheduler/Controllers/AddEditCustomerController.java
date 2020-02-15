@@ -95,29 +95,29 @@ public class AddEditCustomerController implements Initializable {
         }
         
         //Create model objects
-            Address ad = new Address(
-                0,
-                addressField.getText(),
-                address2Field.getText(),
-                cityField.getText(),
-                countryField.getText(),
-                postalField.getText(),
-                phoneField.getText()
-            );
-        
-            boolean active = activeCombo.getSelectionModel().getSelectedItem() == Customer.ActiveState.Active;
-            Customer formCust = new Customer(
-                   0,
-                   nameField.getText(),
-                   ad,
-                   active
-            );  
+        Address ad = new Address(
+            0,
+            addressField.getText(),
+            address2Field.getText(),
+            cityField.getText(),
+            countryField.getText(),
+            postalField.getText(),
+            phoneField.getText()
+        );
+
+        boolean active = activeCombo.getSelectionModel().getSelectedItem() == Customer.ActiveState.Active;
+        Customer formCust = new Customer(
+               0,
+               nameField.getText(),
+               ad,
+               active
+        );  
             
         if(editingCust == null)
         {
             //Add customer
-            sdal.addCustomer(formCust);
-            
+            int newCustId = sdal.addCustomer(formCust);
+            formCust.setCustomerId(newCustId);
         }
         else 
         {
@@ -127,8 +127,11 @@ public class AddEditCustomerController implements Initializable {
             sdal.updateCustomer(formCust);
         }
         
-        returnedCustomer = editingCust;
-        stage.close();
+        returnedCustomer = formCust;
+        
+        
+        Stage s = (Stage) addEditButton.getScene().getWindow();
+        s.close();
     }
     
     private boolean isFormValid()
