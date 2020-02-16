@@ -56,7 +56,7 @@
             <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
          </padding>
       </Button>
-      <TextArea fx:id="descriptionArea" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.rowSpan="3" />
+      <TextArea fx:id="descriptionArea" prefHeight="200.0" prefWidth="200.0" wrapText="true"  GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.rowSpan="3" />
       <Label text="Contact" GridPane.columnIndex="2" GridPane.rowIndex="7" />
       <TextField fx:id="contactField" GridPane.columnIndex="3" GridPane.rowIndex="7" />
       <Label text="Customer Info" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="5">

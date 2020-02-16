@@ -47,18 +47,7 @@ public class SchedulerDAL {
         db.close();
     }
     
-    public boolean checkCredentials(String un, String pass) throws SQLException
-    {
-        //Vulnerable to SQL injection!
-        String sql = "SELECT 1 FROM user u WHERE u.userName = ? AND u.password = ?;";
-        ResultSet resultSet = parameterizedQuery(sql, un, pass);
-        if (resultSet.next())
-        {
-            userName = un;
-            return true;
-        }
-        return false;
-    }
+    //Database Helpers
     
     public ResultSet parameterizedQuery(String queryString, String param1) throws SQLException
     {
@@ -92,11 +81,50 @@ public class SchedulerDAL {
         ResultSet result = statement.executeQuery(queryString);
         return result;
     }
+    public Address extractAddress(ResultSet dbRow) throws SQLException
+    {
+        return new Address(
+                    dbRow.getInt("addressId"),
+                    dbRow.getString("address"),
+                    dbRow.getString("address2"),
+                    dbRow.getString("city"),
+                    dbRow.getString("country"),
+                    dbRow.getString("postalCode"),
+                    dbRow.getString("phone")
+            );
+    }
     
+    public Customer extractCustomer(ResultSet dbRow) throws SQLException
+    {
+        Customer output = new Customer(
+                    dbRow.getInt("customerId"),
+                    dbRow.getString("customerName"),
+                    extractAddress(dbRow),
+                    dbRow.getBoolean("active")
+            );
+        return output;
+    }
     
-    //Adapted from https://stackoverflow.com/questions/696782/retrieve-column-names-from-java-sql-resultset
+    public Appointment extractAppoint(ResultSet dbRow) throws SQLException
+    {
+        return new Appointment(
+            dbRow.getInt("appointmentId"),
+            extractCustomer(dbRow),
+            dbRow.getString("title"),
+            dbRow.getString("description"),
+            dbRow.getString("location"),
+            dbRow.getString("contact"),
+            dbRow.getString("type"),
+            dbRow.getString("url"),
+            dbRow.getTimestamp("start").toInstant(),
+            dbRow.getTimestamp("end").toInstant()
+            );
+    }
+    
+    //Debugging
     public void printColumnNamesInResult(ResultSet input) throws SQLException
     {
+        //Adapted from https://stackoverflow.com/questions/696782/retrieve-column-names-from-java-sql-resultset
         System.out.println("Showing column in results...");
         ResultSetMetaData rsmd = input.getMetaData();
         int columnCount = rsmd.getColumnCount();
@@ -107,6 +135,30 @@ public class SchedulerDAL {
 }
     }
     
+    //Login
+    
+    public boolean checkCredentials(String un, String pass) throws SQLException
+    {
+        //Vulnerable to SQL injection!
+        String sql = "SELECT 1 FROM user u WHERE u.userName = ? AND u.password = ?;";
+        ResultSet resultSet = parameterizedQuery(sql, un, pass);
+        if (resultSet.next())
+        {
+            userName = un;
+            return true;
+        }
+        return false;
+    }
+    
+    //Customer CRUD
+    
+    public void deleteCustomer(int customerId) throws SQLException
+    {
+        String sql = "DELETE FROM customer WHERE customerId = ?";
+        PreparedStatement preps = db.prepareStatement(sql);
+        preps.setInt(1, customerId);
+        preps.execute();
+    }
     public ArrayList<Customer> getCustomers() throws SQLException
     {
         ResultSet results = query("SELECT\n" +
@@ -135,138 +187,6 @@ public class SchedulerDAL {
         }
         return output;
     }
-    
-    public Address extractAddress(ResultSet dbRow) throws SQLException
-    {
-        return new Address(
-                    dbRow.getInt("addressId"),
-                    dbRow.getString("address"),
-                    dbRow.getString("address2"),
-                    dbRow.getString("city"),
-                    dbRow.getString("country"),
-                    dbRow.getString("postalCode"),
-                    dbRow.getString("phone")
-            );
-    }
-    
-    public Customer extractCustomer(ResultSet dbRow) throws SQLException
-    {
-        Customer output = new Customer(
-                    dbRow.getInt("customerId"),
-                    dbRow.getString("customerName"),
-                    extractAddress(dbRow),
-                    dbRow.getBoolean("active")
-            );
-        return output;
-    }
-    
-    /*
-    Requires ridiculously large query result rows.
-    */
-    public Appointment extractAppoint(ResultSet dbRow) throws SQLException
-    {
-        return new Appointment(
-            dbRow.getInt("appointmentId"),
-            extractCustomer(dbRow),
-            dbRow.getString("title"),
-            dbRow.getString("description"),
-            dbRow.getString("location"),
-            dbRow.getString("contact"),
-            dbRow.getString("type"),
-            dbRow.getString("url"),
-            dbRow.getTimestamp("start").toInstant(),
-            dbRow.getTimestamp("end").toInstant()
-            );
-    }
-    
-    public void deleteCustomer(int customerId)
-    {
-        System.out.println("Let's pretend we just deleted a customer.");
-    }
-
-    public ArrayList<Appointment> getAppointments() throws SQLException {
-        ResultSet results = query("SELECT\n" +
-        "	A.appointmentId,\n" +
-        "    A.title,\n" +
-        "    A.description,\n" +
-        "    A.location,\n" +
-        "    A.contact,\n" +
-        "    A.type,\n" +
-        "    A.url,\n" +
-        "    A.start,\n" +
-        "    A.end,\n" +
-        "    A.lastUpdate,\n" +
-        "	CU.customerId,\n" +
-        "    CU.customerName,\n" +
-        "    CU.addressId,\n" +
-        "    CU.active,\n" +
-        "    AD.address,\n" +
-        "    AD.address2,\n" +
-        "	city.city,\n" +
-        "    country.country,\n" +
-        "    AD.postalCode,\n" +
-        "    AD.phone\n" +
-        "FROM appointment A\n" +
-        "INNER JOIN customer CU ON A.customerId = CU.customerId\n" +
-        "INNER JOIN address AD ON CU.addressId = AD.addressId\n" +
-        "INNER JOIN city ON AD.cityId = city.cityId\n" +
-        "INNER JOIN country ON city.countryId = country.countryId");
-        
-        printColumnNamesInResult(results);
-        
-        ArrayList<Appointment> output = new ArrayList<>();
-        while(results.next())
-        {
-            output.add(extractAppoint(results));
-        }
-        return output;
-    }
-
-    public void deleteAppointment(int appointmentId) {
-        System.out.println("Let's pretend we just deleted an appointment.");
-    }
-
-    public int addCustomer(Customer newCust) throws SQLException {
-        try
-        {
-            db.setAutoCommit(false);    //Must be disabled start a transaction
-            
-            int addressId = getAddressIdWithInsert(newCust.getAddress());
-            
-            //Write customer
-            String sql = "INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdateBy)\n" +
-                "Values (?,?,?,?,?,?)";
-            PreparedStatement preps = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-
-            
-            preps.setString(1, newCust.getName());
-            preps.setInt(2, addressId);
-            preps.setBoolean(3, newCust.isActive());
-            Instant now = Instant.now();
-            preps.setTimestamp(4, Timestamp.from(now));
-            preps.setString(5, userName);
-            preps.setString(6, userName);
-            preps.execute();
-            
-            ResultSet keys = preps.getGeneratedKeys();    
-            keys.next();  
-            int key = keys.getInt(1);
-            
-            db.commit();
-            return key;
-        }
-        catch (SQLException se)
-        {
-            db.rollback();
-            throw se;
-        }
-        finally
-        {
-            db.setAutoCommit(true);
-        }
-        
-    }
-
     public int getAddressIdWithInsert(Address addr) throws SQLException
     {
         //See if addressId exists
@@ -363,9 +283,9 @@ public class SchedulerDAL {
         return key;
         
     }
-
-    //Insufficient resolution for real-world use. Ex: there are many Portlands in the US.
+   
     private int getCityIdWithInsert(String city, String country) throws SQLException {
+        //Insufficient resolution for real-world use. Ex: there are many Portlands in the US.
         ResultSet results = parameterizedQuery("SELECT cityId FROM city\n" +
             "INNER JOIN country ON city.countryId = country.countryId\n" +
             "WHERE city.city = ? AND country.country = ?", city, country);
@@ -396,6 +316,95 @@ public class SchedulerDAL {
         return key;
      }
 
+    //Appointment CRUD
+    
+    public ArrayList<Appointment> getAppointments() throws SQLException {
+        ResultSet results = query("SELECT\n" +
+        "	A.appointmentId,\n" +
+        "    A.title,\n" +
+        "    A.description,\n" +
+        "    A.location,\n" +
+        "    A.contact,\n" +
+        "    A.type,\n" +
+        "    A.url,\n" +
+        "    A.start,\n" +
+        "    A.end,\n" +
+        "    A.lastUpdate,\n" +
+        "	CU.customerId,\n" +
+        "    CU.customerName,\n" +
+        "    CU.addressId,\n" +
+        "    CU.active,\n" +
+        "    AD.address,\n" +
+        "    AD.address2,\n" +
+        "	city.city,\n" +
+        "    country.country,\n" +
+        "    AD.postalCode,\n" +
+        "    AD.phone\n" +
+        "FROM appointment A\n" +
+        "INNER JOIN customer CU ON A.customerId = CU.customerId\n" +
+        "INNER JOIN address AD ON CU.addressId = AD.addressId\n" +
+        "INNER JOIN city ON AD.cityId = city.cityId\n" +
+        "INNER JOIN country ON city.countryId = country.countryId");
+        
+        printColumnNamesInResult(results);
+        
+        ArrayList<Appointment> output = new ArrayList<>();
+        while(results.next())
+        {
+            output.add(extractAppoint(results));
+        }
+        return output;
+    }
+
+    public void deleteAppointment(int appointmentId) throws SQLException {
+        String sql = "DELETE FROM appointment WHERE appointmentId = ?";
+        PreparedStatement preps = db.prepareStatement(sql);
+        preps.setInt(1, appointmentId);
+        preps.execute();
+    }
+
+    public int addCustomer(Customer newCust) throws SQLException {
+        try
+        {
+            db.setAutoCommit(false);    //Must be disabled start a transaction
+            
+            int addressId = getAddressIdWithInsert(newCust.getAddress());
+            
+            //Write customer
+            String sql = "INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdateBy)\n" +
+                "Values (?,?,?,?,?,?)";
+            PreparedStatement preps = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            
+            preps.setString(1, newCust.getName());
+            preps.setInt(2, addressId);
+            preps.setBoolean(3, newCust.isActive());
+            Instant now = Instant.now();
+            preps.setTimestamp(4, Timestamp.from(now));
+            preps.setString(5, userName);
+            preps.setString(6, userName);
+            preps.execute();
+            
+            ResultSet keys = preps.getGeneratedKeys();    
+            keys.next();  
+            int key = keys.getInt(1);
+            
+            db.commit();
+            return key;
+        }
+        catch (SQLException se)
+        {
+            db.rollback();
+            throw se;
+        }
+        finally
+        {
+            db.setAutoCommit(true);
+        }
+        
+    }
+
+    
     public void updateAppointment(Appointment updatedAppoint) throws SQLException {
         String sql = "UPDATE appointment\n" +
             "SET\n" +

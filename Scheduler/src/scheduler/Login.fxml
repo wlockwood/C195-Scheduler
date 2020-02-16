@@ -18,7 +18,7 @@
         <Text fx:id="regionDetectedLabel" layoutX="43.0" layoutY="133.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Region detected:" />
         <Label fx:id="regionDetected" layoutX="146.0" layoutY="120.0" text="somewhere" />
         
-        <Button fx:id="loginButton" layoutX="116.0" layoutY="161.0" onAction="#loginClick" text="Log In" />
+        <Button fx:id="loginButton" layoutX="116.0" layoutY="161.0" onAction="#loginClick" text="Log In" defaultButton="true"  />
       
     </children>
 </AnchorPane>

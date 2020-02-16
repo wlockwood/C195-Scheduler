@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ResourceBundle;
@@ -24,7 +23,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -128,12 +126,12 @@ public class AddEditAppointController implements Initializable {
         boolean requiredMissing = false;
         if("".equals(titleField.getText()) || titleField.getText() == null) { requiredMissing = true; }
         //if("".equals(locationField.getText()) || locationField.getText() == null) { requiredMissing = true; }
-        //if("".equals(typeField.getText()) || typeField.getText() == null) { requiredMissing = true; }
+        if(customerCombo.getValue() == null) { requiredMissing = true; }
         if("".equals(startField.getText()) || startField.getText() == null) { requiredMissing = true; }
         if("".equals(endField.getText()) || endField.getText() == null) { requiredMissing = true; }
         
         if(requiredMissing) {
-            new Alert(Alert.AlertType.ERROR, "Title Start, and End are all required fields.").show();
+            new Alert(Alert.AlertType.ERROR, "Title, Customer, Start, and End are all required fields.").show();
             return false;
         }
         
