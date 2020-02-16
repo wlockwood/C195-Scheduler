@@ -140,9 +140,4 @@ public class Appointment {
         return utcTime.atZone(here.toZoneId())
                     .toLocalDateTime();
     }
-    
-    public static Instant ZulifyTime(LocalDateTime localTime)
-    {
-        return localTime.toInstant(ZoneOffset.UTC);
-    }
 }

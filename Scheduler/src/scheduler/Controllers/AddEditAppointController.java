@@ -10,6 +10,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -57,6 +58,9 @@ public class AddEditAppointController implements Initializable {
     @FXML private TextField startField;
     @FXML private TextField endField;
         
+    public static LocalTime businessHoursStartTime = LocalTime.of(8, 0, 0);
+    public static LocalTime businessHoursEndTime = LocalTime.of(17, 0, 0);
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
     }
@@ -120,6 +124,7 @@ public class AddEditAppointController implements Initializable {
     
     private boolean isFormValid()
     {
+        //Check required fields
         boolean requiredMissing = false;
         if("".equals(titleField.getText()) || titleField.getText() == null) { requiredMissing = true; }
         //if("".equals(locationField.getText()) || locationField.getText() == null) { requiredMissing = true; }
@@ -131,9 +136,22 @@ public class AddEditAppointController implements Initializable {
             new Alert(Alert.AlertType.ERROR, "Title Start, and End are all required fields.").show();
             return false;
         }
+        
+        //Check date-time formatting and business hours within acceptable range
         String dateErrorText = "formatting invalid. Should look like '" + instantToLocalString(Instant.now()) + "'.";
+        
+        String bhTimeString = businessHoursStartTime.toString() + " - " + businessHoursEndTime.toString();
         try{
-            localStringToInstant(startField.getText());    
+            Instant newStartInstant = localStringToInstant(startField.getText());    
+            LocalTime newStartTime = Appointment.LocalizeTime(newStartInstant).toLocalTime();
+            boolean equal = newStartTime.equals(businessHoursStartTime);
+            boolean within = newStartTime.compareTo(businessHoursStartTime) == 1 
+                        & newStartTime.compareTo(businessHoursEndTime) == -1;
+            if(!(equal || within))
+            {
+                new Alert(Alert.AlertType.ERROR, "Start time is not within business hours (" + bhTimeString + ").").show();
+                return false;
+            }
         }
         catch (DateTimeParseException de)
         {
@@ -142,13 +160,24 @@ public class AddEditAppointController implements Initializable {
         }
         
         try{
-            localStringToInstant(endField.getText());    
+            Instant newEndInstant = localStringToInstant(endField.getText());     
+            LocalTime newEndTime = Appointment.LocalizeTime(newEndInstant).toLocalTime();
+            boolean equal = newEndTime.equals(businessHoursEndTime);
+            boolean within = newEndTime.compareTo(businessHoursStartTime) == 1 
+                        & newEndTime.compareTo(businessHoursEndTime) == -1;
+            if(!(equal || within))
+            {
+                new Alert(Alert.AlertType.ERROR, "End time is not within business hours (" + bhTimeString + ").").show();
+                return false;
+            }
         }
         catch (DateTimeParseException de)
         {
             new Alert(Alert.AlertType.ERROR, "End " + dateErrorText).show();
             return false;
         }
+        
+        
 
         return true;
     }
@@ -202,6 +231,12 @@ public class AddEditAppointController implements Initializable {
         
         for(Appointment appt : appointments)
         {
+            //Don't check the appointment we're editing as a potential conflict with itself.
+            if (appt.getAppointmentId() == formAppoint.getAppointmentId())
+            {
+                continue;
+            }
+            
             long peStart = appt.getStart().getEpochSecond();
             long peEnd = appt.getEnd().getEpochSecond();
             
