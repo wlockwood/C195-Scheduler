@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
@@ -185,31 +186,31 @@ public class SchedulerDAL {
 
     public ArrayList<Appointment> getAppointments() throws SQLException {
         ResultSet results = query("SELECT\n" +
-"	A.appointmentId,\n" +
-"    A.title,\n" +
-"    A.description,\n" +
-"    A.location,\n" +
-"    A.contact,\n" +
-"    A.type,\n" +
-"    A.url,\n" +
-"    A.start,\n" +
-"    A.end,\n" +
-"    A.lastUpdate,\n" +
-"	CU.customerId,\n" +
-"    CU.customerName,\n" +
-"    CU.addressId,\n" +
-"    CU.active,\n" +
-"    AD.address,\n" +
-"    AD.address2,\n" +
-"	city.city,\n" +
-"    country.country,\n" +
-"    AD.postalCode,\n" +
-"    AD.phone\n" +
-"FROM appointment A\n" +
-"INNER JOIN customer CU ON A.customerId = CU.customerId\n" +
-"INNER JOIN address AD ON CU.addressId = AD.addressId\n" +
-"INNER JOIN city ON AD.cityId = city.cityId\n" +
-"INNER JOIN country ON city.countryId = country.countryId");
+        "	A.appointmentId,\n" +
+        "    A.title,\n" +
+        "    A.description,\n" +
+        "    A.location,\n" +
+        "    A.contact,\n" +
+        "    A.type,\n" +
+        "    A.url,\n" +
+        "    A.start,\n" +
+        "    A.end,\n" +
+        "    A.lastUpdate,\n" +
+        "	CU.customerId,\n" +
+        "    CU.customerName,\n" +
+        "    CU.addressId,\n" +
+        "    CU.active,\n" +
+        "    AD.address,\n" +
+        "    AD.address2,\n" +
+        "	city.city,\n" +
+        "    country.country,\n" +
+        "    AD.postalCode,\n" +
+        "    AD.phone\n" +
+        "FROM appointment A\n" +
+        "INNER JOIN customer CU ON A.customerId = CU.customerId\n" +
+        "INNER JOIN address AD ON CU.addressId = AD.addressId\n" +
+        "INNER JOIN city ON AD.cityId = city.cityId\n" +
+        "INNER JOIN country ON city.countryId = country.countryId");
         
         printColumnNamesInResult(results);
         
@@ -313,8 +314,7 @@ public class SchedulerDAL {
             "	customerName = ?, \n" +
             "	addressId = ?, \n" +
             "    active = ?, \n" +
-            "    createDate = ?, \n" +
-            "    createdBy = ?, \n" +
+            "    lastUpdate = ?\n" +
             "    lastUpdateBy = ?\n" +
             "WHERE\n" +
             "	customerId = ?";
@@ -326,7 +326,6 @@ public class SchedulerDAL {
         Instant now = Instant.now();
         preps.setTimestamp(4, Timestamp.from(now));
         preps.setString(5, userName);
-        preps.setString(6, userName);
         preps.setInt(7, cust.getCustomerId());
         preps.execute();
     }
@@ -397,12 +396,93 @@ public class SchedulerDAL {
         return key;
      }
 
-    public void updateAppointment(Appointment formAppoint) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void updateAppointment(Appointment updatedAppoint) throws SQLException {
+        String sql = "UPDATE appointment\n" +
+            "SET\n" +
+            "	customerId = ?,\n" +
+            "    title = ?,\n" +
+            "    description = ?,\n" +
+            "    location = ?,\n" +
+            "    contact = ?,\n" +
+            "    type = ?,\n" +
+            "    url = ?,\n" +
+            "    start = ?,\n" +
+            "    end = ?,\n" +
+            "    lastUpdate = ?\n" +
+            "    lastUpdateBy = ?\n" +
+            "WHERE appointmentId = ?";
+        PreparedStatement preps = db.prepareStatement(sql);
+
+        preps.setInt(1, updatedAppoint.getCustomer().getCustomerId());
+        preps.setString(3, updatedAppoint.getTitle());
+        preps.setString(4, updatedAppoint.getDescription());
+        preps.setString(5, updatedAppoint.getLocation());
+        preps.setString(6, updatedAppoint.getContact());
+        preps.setString(7, updatedAppoint.getType());
+        preps.setString(8, updatedAppoint.getUrl());
+        preps.setTimestamp(9, Timestamp.from(updatedAppoint.getStart()));
+        preps.setTimestamp(10, Timestamp.from(updatedAppoint.getStop()));
+
+        Instant now = Instant.now();
+        preps.setTimestamp(11, Timestamp.from(now));
+        preps.setString(12, userName);
+        preps.execute();
     }
 
-    public int addAppointment(Appointment formAppoint) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public int addAppointment(Appointment newAppoint) throws Exception {
+        try
+        {
+            ResultSet userResult = parameterizedQuery("SELECT userId from user WHERE userName = ?", userName);
+            int userId = 0;
+            if(userResult.next())
+            {
+                userId = userResult.getInt(userId);
+            }
+            else
+            {
+                throw new Exception("User not found in database!");
+            }
+            
+            db.setAutoCommit(false);    //Must be disabled start a transaction
+            
+            //Write customer
+            String sql = "INSERT INTO appointment (customerId, userId, title, description, location, contact, type, url, start, end, createDate, createdBy, lastUpdateBy)\n" +
+                "Values (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            PreparedStatement preps = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            preps.setInt(1, newAppoint.getCustomer().getCustomerId());
+            preps.setInt(2, userId);
+            preps.setString(3, newAppoint.getTitle());
+            preps.setString(4, newAppoint.getDescription());
+            preps.setString(5, newAppoint.getLocation());
+            preps.setString(6, newAppoint.getContact());
+            preps.setString(7, newAppoint.getType());
+            preps.setString(8, newAppoint.getUrl());
+            preps.setTimestamp(9, Timestamp.from(newAppoint.getStart()));
+            preps.setTimestamp(10, Timestamp.from(newAppoint.getStop()));
+            
+            Instant now = Instant.now();
+            preps.setTimestamp(11, Timestamp.from(now));
+            preps.setString(12, userName);
+            preps.setString(13, userName);
+            preps.execute();
+            
+            ResultSet keys = preps.getGeneratedKeys();    
+            keys.next();  
+            int key = keys.getInt(1);
+            
+            db.commit();
+            return key;
+        }
+        catch (SQLException se)
+        {
+            db.rollback();
+            throw se;
+        }
+        finally
+        {
+            db.setAutoCommit(true);
+        }
     }
     
     

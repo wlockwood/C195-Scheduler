@@ -144,7 +144,7 @@ public class AddEditAppointController implements Initializable {
                     .toString();
     }
     
-    @FXML private void addEditClick(ActionEvent event) throws SQLException {
+    @FXML private void addEditClick(ActionEvent event) throws SQLException, Exception {
         
         if(!isFormValid())
         {
