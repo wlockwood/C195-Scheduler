@@ -83,7 +83,7 @@ public class LoginController implements Initializable {
         
     }
     
-    public void showMainMenu() throws IOException
+    public void showMainMenu() throws IOException, SQLException
     {
         FXMLLoader menuLoader = new FXMLLoader(getClass().getResource("/scheduler/Menu.fxml"));
         Parent root = menuLoader.load();

@@ -178,7 +178,7 @@ public class SchedulerDAL {
         "INNER JOIN city Cit ON A.cityId = Cit.cityId\n" +
         "INNER JOIN country Coun ON Cit.countryId = Coun.countryId;");
         
-        printColumnNamesInResult(results);
+        //printColumnNamesInResult(results);
         
         ArrayList<Customer> output = new ArrayList<>();
         while(results.next())
@@ -346,7 +346,7 @@ public class SchedulerDAL {
         "INNER JOIN city ON AD.cityId = city.cityId\n" +
         "INNER JOIN country ON city.countryId = country.countryId");
         
-        printColumnNamesInResult(results);
+        //printColumnNamesInResult(results);
         
         ArrayList<Appointment> output = new ArrayList<>();
         while(results.next())
@@ -448,7 +448,9 @@ public class SchedulerDAL {
             
             ResultSet userResult = parameterizedQuery("SELECT userId from user WHERE userName = ?", userName);
             int userId = 0;
-            printColumnNamesInResult(userResult); //DEBUG
+            
+            //(userResult); //DEBUG
+            
             if(userResult.next())
             {
                 userId = userResult.getInt("userId");

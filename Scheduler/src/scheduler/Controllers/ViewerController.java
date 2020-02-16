@@ -121,7 +121,7 @@ public class ViewerController implements Initializable {
     }
 
     @FXML
-    private void handleDeleteClick(ActionEvent event) {
+    private void handleDeleteClick(ActionEvent event) throws SQLException {
         Stage myStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
         if (mode == TypeMode.Customer) {
