@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 import javafx.collections.FXCollections;
@@ -26,6 +27,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import scheduler.DataAccess.SchedulerDAL;
 import scheduler.Model.Appointment;
 import scheduler.Model.Customer;
@@ -66,9 +68,28 @@ public class AddEditAppointController implements Initializable {
         editingAppoint = toEdit;
         customers = FXCollections.observableArrayList(sdal.getCustomers());
         
+        customerCombo.setItems(customers);
+        
+        //Modified from https://stackoverflow.com/questions/41634789/javafx-combobox-display-text-but-return-id-on-selection
+        customerCombo.setConverter(new StringConverter<Customer>() {
+
+            @Override
+            public String toString(Customer object) {
+                return object.getName();
+            }
+
+            @Override
+            public Customer fromString(String string) {
+                return customerCombo.getItems().stream().filter(ap -> 
+                    ap.getName().equals(string)).findFirst().orElse(null);
+            }
+        });
+        
         if(editingAppoint == null)
         {
             addEditButton.setText("Add appointment");
+            startField.setText(instantToLocalString(Instant.now()));
+            endField.setText(instantToLocalString(Instant.now().plus(30, ChronoUnit.MINUTES)));
         }
         else 
         {
@@ -99,13 +120,13 @@ public class AddEditAppointController implements Initializable {
     {
         boolean requiredMissing = false;
         if("".equals(titleField.getText()) || titleField.getText() == null) { requiredMissing = true; }
-        if("".equals(locationField.getText()) || locationField.getText() == null) { requiredMissing = true; }
-        if("".equals(typeField.getText()) || typeField.getText() == null) { requiredMissing = true; }
+        //if("".equals(locationField.getText()) || locationField.getText() == null) { requiredMissing = true; }
+        //if("".equals(typeField.getText()) || typeField.getText() == null) { requiredMissing = true; }
         if("".equals(startField.getText()) || startField.getText() == null) { requiredMissing = true; }
         if("".equals(endField.getText()) || endField.getText() == null) { requiredMissing = true; }
         
         if(requiredMissing) {
-            new Alert(Alert.AlertType.ERROR, "Title, Location, Customer, Start, and End are all required fields.").show();
+            new Alert(Alert.AlertType.ERROR, "Title Start, and End are all required fields.").show();
             return false;
         }
         String dateErrorText = "formatting invalid. Should look like '" + instantToLocalString(Instant.now()) + "'.";
@@ -151,9 +172,13 @@ public class AddEditAppointController implements Initializable {
             //isFormValid() handles alerting
             return;
         }
-        
+        int appointId = 0;
+        if(editingAppoint != null) 
+        { 
+            appointId = editingAppoint.getAppointmentId(); 
+        }
         Appointment formAppoint = new Appointment(
-               0,
+               appointId,
                customerCombo.getValue(),
                titleField.getText(),
                descriptionArea.getText(),

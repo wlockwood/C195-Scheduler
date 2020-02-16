@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,6 +20,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -48,6 +50,7 @@ public class ViewerController implements Initializable {
     @FXML private TableColumn<Appointment, String> apptTitleCol;
     @FXML private TableColumn<Appointment, String> apptLocationCol;
     @FXML private TableColumn<Appointment, String> apptTypeCol;
+    
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -61,9 +64,10 @@ public class ViewerController implements Initializable {
         customersTable.setVisible(false);
         appointmentsTable.setVisible(false);
 
+        ArrayList<Customer> customers = sdal.getCustomers();    //Used by both modes
+        
         if (mode == TypeMode.Customer) {
             //Get customers from DB
-            ArrayList<Customer> customers = sdal.getCustomers();
 
             //Load customers into tableview
             SimpleListProperty<Customer> custProperty = new SimpleListProperty<>();
@@ -89,9 +93,9 @@ public class ViewerController implements Initializable {
             apptIdCol.setCellValueFactory(new PropertyValueFactory<>("appointmentId"));
             apptStartCol.setCellValueFactory(new PropertyValueFactory<>("start"));
             apptEndCol.setCellValueFactory(new PropertyValueFactory<>("stop"));
-            apptCustCol.setCellValueFactory(new PropertyValueFactory<>("title"));
-            apptTitleCol.setCellValueFactory(new PropertyValueFactory<>("location"));
-            apptLocationCol.setCellValueFactory(new PropertyValueFactory<>("contact"));
+            apptCustCol.setCellValueFactory(tc -> new SimpleStringProperty(tc.getValue().getCustomer().getName())); //SSP suggestion from https://stackoverflow.com/questions/35534723/convert-a-string-to-an-observablevaluestring?rq=1
+            apptTitleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
+            apptLocationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
             apptTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
 
             appointmentsTable.setVisible(true);

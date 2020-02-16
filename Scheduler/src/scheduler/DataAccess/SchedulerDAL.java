@@ -408,42 +408,46 @@ public class SchedulerDAL {
             "    url = ?,\n" +
             "    start = ?,\n" +
             "    end = ?,\n" +
-            "    lastUpdate = ?\n" +
+            "    lastUpdate = ?,\n" +
             "    lastUpdateBy = ?\n" +
             "WHERE appointmentId = ?";
+        System.out.println("Update appointment SQL:");
+        System.out.println(sql);
         PreparedStatement preps = db.prepareStatement(sql);
 
         preps.setInt(1, updatedAppoint.getCustomer().getCustomerId());
-        preps.setString(3, updatedAppoint.getTitle());
-        preps.setString(4, updatedAppoint.getDescription());
-        preps.setString(5, updatedAppoint.getLocation());
-        preps.setString(6, updatedAppoint.getContact());
-        preps.setString(7, updatedAppoint.getType());
-        preps.setString(8, updatedAppoint.getUrl());
-        preps.setTimestamp(9, Timestamp.from(updatedAppoint.getStart()));
-        preps.setTimestamp(10, Timestamp.from(updatedAppoint.getStop()));
+        preps.setString(2, updatedAppoint.getTitle());
+        preps.setString(3, updatedAppoint.getDescription());
+        preps.setString(4, updatedAppoint.getLocation());
+        preps.setString(5, updatedAppoint.getContact());
+        preps.setString(6, updatedAppoint.getType());
+        preps.setString(7, updatedAppoint.getUrl());
+        preps.setTimestamp(8, Timestamp.from(updatedAppoint.getStart()));
+        preps.setTimestamp(9, Timestamp.from(updatedAppoint.getStop()));
 
         Instant now = Instant.now();
-        preps.setTimestamp(11, Timestamp.from(now));
-        preps.setString(12, userName);
+        preps.setTimestamp(10, Timestamp.from(now));
+        preps.setString(11, userName);
+        preps.setInt(12, updatedAppoint.getAppointmentId());
         preps.execute();
     }
 
     public int addAppointment(Appointment newAppoint) throws Exception {
         try
         {
+            db.setAutoCommit(false);
+            
             ResultSet userResult = parameterizedQuery("SELECT userId from user WHERE userName = ?", userName);
             int userId = 0;
+            printColumnNamesInResult(userResult); //DEBUG
             if(userResult.next())
             {
-                userId = userResult.getInt(userId);
+                userId = userResult.getInt("userId");
             }
             else
             {
                 throw new Exception("User not found in database!");
             }
-            
-            db.setAutoCommit(false);    //Must be disabled start a transaction
             
             //Write customer
             String sql = "INSERT INTO appointment (customerId, userId, title, description, location, contact, type, url, start, end, createDate, createdBy, lastUpdateBy)\n" +
