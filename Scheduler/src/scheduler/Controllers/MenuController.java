@@ -3,7 +3,11 @@ package scheduler.Controllers;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,8 +15,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 import scheduler.DataAccess.SchedulerDAL;
+import scheduler.Model.Appointment;
 
 
 public class MenuController implements Initializable {
@@ -48,9 +54,22 @@ public class MenuController implements Initializable {
                 .show();
     }
 
-    void construct(SchedulerDAL _sdal, Stage _stage) {
+    void construct(SchedulerDAL _sdal, Stage _stage) throws SQLException {
         sdal = _sdal;
         stage = _stage;
+        
+        ArrayList<Appointment> appointments = sdal.getAppointments();
+        long upcomingLimit = Instant.now().plus(15, ChronoUnit.MINUTES).getEpochSecond();
+        for(Appointment appt : appointments)
+        {
+            if(appt.getStart().getEpochSecond() < upcomingLimit 
+                && appt.getStart().getEpochSecond() > Instant.now().getEpochSecond())
+            {
+                new Alert(AlertType.INFORMATION,"You have an upcoming appointment:\n" + appt.toMultilineString()).show();
+            }
+        }
+            
+        
     }
     
     private void showViewer(ViewerController.TypeMode mode) throws SQLException

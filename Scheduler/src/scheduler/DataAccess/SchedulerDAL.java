@@ -423,7 +423,7 @@ public class SchedulerDAL {
         preps.setString(6, updatedAppoint.getType());
         preps.setString(7, updatedAppoint.getUrl());
         preps.setTimestamp(8, Timestamp.from(updatedAppoint.getStart()));
-        preps.setTimestamp(9, Timestamp.from(updatedAppoint.getStop()));
+        preps.setTimestamp(9, Timestamp.from(updatedAppoint.getEnd()));
 
         Instant now = Instant.now();
         preps.setTimestamp(10, Timestamp.from(now));
@@ -463,7 +463,7 @@ public class SchedulerDAL {
             preps.setString(7, newAppoint.getType());
             preps.setString(8, newAppoint.getUrl());
             preps.setTimestamp(9, Timestamp.from(newAppoint.getStart()));
-            preps.setTimestamp(10, Timestamp.from(newAppoint.getStop()));
+            preps.setTimestamp(10, Timestamp.from(newAppoint.getEnd()));
             
             Instant now = Instant.now();
             preps.setTimestamp(11, Timestamp.from(now));

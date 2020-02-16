@@ -89,8 +89,8 @@ public class ViewerController implements Initializable {
             appointmentsTable.itemsProperty().bind(apptProperty);
 
             apptIdCol.setCellValueFactory(new PropertyValueFactory<>("appointmentId"));
-            apptStartCol.setCellValueFactory(new PropertyValueFactory<>("start"));
-            apptEndCol.setCellValueFactory(new PropertyValueFactory<>("stop"));
+            apptStartCol.setCellValueFactory(new PropertyValueFactory<>("localizedStart"));
+            apptEndCol.setCellValueFactory(new PropertyValueFactory<>("localizedEnd"));
             //This lambda allows us to resolve the customer name instead of displaying the customer's toString
             apptCustCol.setCellValueFactory(tc -> new SimpleStringProperty(tc.getValue().getCustomer().getName()));  //SSP suggestion from https://stackoverflow.com/questions/35534723/convert-a-string-to-an-observablevaluestring?rq=1
             apptTitleCol.setCellValueFactory(new PropertyValueFactory<>("title"));

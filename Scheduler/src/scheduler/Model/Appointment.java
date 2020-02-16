@@ -1,7 +1,11 @@
 package scheduler.Model;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.TimeZone;
 
 public class Appointment {
     private int appointmentId;
@@ -103,11 +107,42 @@ public class Appointment {
         this.start = start;
     }
 
-    public Instant getStop() {
+    public Instant getEnd() {
         return end;
     }
 
-    public void setStop(Instant stop) {
-        this.end = stop;
+    public void setEnd(Instant end) {
+        this.end = end;
+    }
+    
+    public LocalDateTime getLocalizedStart()
+    {
+        return LocalizeTime(start);
+    }
+    
+    public LocalDateTime getLocalizedEnd()
+    {
+        return LocalizeTime(end);
+    }
+    
+    public String toMultilineString()
+    {
+         return "\nTitle: " + title
+            + "\nCustomer: " + customer.getName()
+            + "\nStart: " + getLocalizedStart().toString()
+            + "\nEnd: " + getLocalizedEnd().toString();   
+    }
+         
+  
+    public static LocalDateTime LocalizeTime(Instant utcTime)
+    {
+        TimeZone here = TimeZone.getDefault();
+        return utcTime.atZone(here.toZoneId())
+                    .toLocalDateTime();
+    }
+    
+    public static Instant ZulifyTime(LocalDateTime localTime)
+    {
+        return localTime.toInstant(ZoneOffset.UTC);
     }
 }

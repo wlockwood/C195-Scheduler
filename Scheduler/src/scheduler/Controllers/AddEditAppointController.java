@@ -104,8 +104,8 @@ public class AddEditAppointController implements Initializable {
             
             
             //Datetimes are stored in UTC and must be converted for display
-            startField.setText(instantToLocalString(editingAppoint.getStart()));
-            endField.setText(instantToLocalString(editingAppoint.getStop()));
+            startField.setText(editingAppoint.getLocalizedStart().toString());
+            endField.setText(editingAppoint.getLocalizedEnd().toString());
             
             //This lambda replaces a for loop to accomplish the same thing.
             //It's ideally not necessary to be this big, but if two copies of 
@@ -138,6 +138,7 @@ public class AddEditAppointController implements Initializable {
         catch (DateTimeParseException de)
         {
             new Alert(Alert.AlertType.ERROR, "Start " + dateErrorText).show();
+            return false;
         }
         
         try{
@@ -146,16 +147,17 @@ public class AddEditAppointController implements Initializable {
         catch (DateTimeParseException de)
         {
             new Alert(Alert.AlertType.ERROR, "End " + dateErrorText).show();
+            return false;
         }
-        
-        
+
         return true;
     }
 
     private Instant localStringToInstant(String toParse)
     {
+        TimeZone here = TimeZone.getDefault();
         LocalDateTime local = LocalDateTime.parse(toParse);
-        Instant output = local.toInstant(ZoneOffset.UTC);
+        Instant output = local.atZone(here.toZoneId()).toInstant();
         return output;
     }
     
@@ -196,12 +198,12 @@ public class AddEditAppointController implements Initializable {
         //Check for appointment overlap
         boolean overlaps = false;
         long newStart = formAppoint.getStart().getEpochSecond();
-        long newEnd = formAppoint.getStop().getEpochSecond();
+        long newEnd = formAppoint.getEnd().getEpochSecond();
         
         for(Appointment appt : appointments)
         {
             long peStart = appt.getStart().getEpochSecond();
-            long peEnd = appt.getStop().getEpochSecond();
+            long peEnd = appt.getEnd().getEpochSecond();
             
             boolean startOverlap = newStart >= peStart && newStart <= peEnd;
             boolean endOverlap = newEnd > peStart && newEnd < peEnd;
@@ -210,10 +212,7 @@ public class AddEditAppointController implements Initializable {
                 overlaps = true;
                 String errorMessage = "New appointment overlaps with existing appointment."
                         + "\n\nExisting Appointment"
-                        + "\nTitle: " + appt.getTitle()
-                        + "\nCustomer: " + appt.getCustomer().getName()
-                        + "\nStart: " + appt.getStart().toString()
-                        + "\nEnd: " + appt.getStop().toString();
+                        + appt.toMultilineString();
                 new Alert(Alert.AlertType.ERROR, errorMessage).show();
                 return;
             }
