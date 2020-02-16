@@ -60,6 +60,7 @@ public class MenuController implements Initializable {
             if(appt.getStart().getEpochSecond() < upcomingLimit 
                 && appt.getStart().getEpochSecond() > Instant.now().getEpochSecond())
             {
+                System.out.println(appt.toMultilineString());
                 new Alert(AlertType.INFORMATION,"You have an upcoming appointment:\n" + appt.toMultilineString()).show();
             }
         }
