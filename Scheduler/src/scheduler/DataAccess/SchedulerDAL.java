@@ -489,5 +489,4 @@ public class SchedulerDAL {
         }
     }
     
-    
 }

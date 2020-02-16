@@ -5,7 +5,6 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,7 +19,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -93,7 +91,8 @@ public class ViewerController implements Initializable {
             apptIdCol.setCellValueFactory(new PropertyValueFactory<>("appointmentId"));
             apptStartCol.setCellValueFactory(new PropertyValueFactory<>("start"));
             apptEndCol.setCellValueFactory(new PropertyValueFactory<>("stop"));
-            apptCustCol.setCellValueFactory(tc -> new SimpleStringProperty(tc.getValue().getCustomer().getName())); //SSP suggestion from https://stackoverflow.com/questions/35534723/convert-a-string-to-an-observablevaluestring?rq=1
+            //This lambda allows us to resolve the customer name instead of displaying the customer's toString
+            apptCustCol.setCellValueFactory(tc -> new SimpleStringProperty(tc.getValue().getCustomer().getName()));  //SSP suggestion from https://stackoverflow.com/questions/35534723/convert-a-string-to-an-observablevaluestring?rq=1
             apptTitleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
             apptLocationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
             apptTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
@@ -205,9 +204,9 @@ public class ViewerController implements Initializable {
                 if (selected == null) {
                     return;
                 }
-                vc.construct(sdal, stage, selected);
+                vc.construct(sdal, stage, selected, appointmentsTable.getItems());
             } else {
-                vc.construct(sdal, stage, null);
+                vc.construct(sdal, stage, null, appointmentsTable.getItems());
             }
 
             //Open in new window

@@ -44,6 +44,7 @@ public class AddEditAppointController implements Initializable {
     Appointment editingAppoint;
     Appointment returnedAppoint;
     ObservableList<Customer> customers;
+    ObservableList<Appointment> appointments;
     
     @FXML private TextField titleField;
     @FXML private TextField locationField;
@@ -60,13 +61,14 @@ public class AddEditAppointController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
     }
 
-    public void construct(SchedulerDAL _sdal, Stage _stage, Appointment toEdit) 
+    public void construct(SchedulerDAL _sdal, Stage _stage, Appointment toEdit, ObservableList<Appointment> _appointments) 
             throws IOException, SQLException
     {
         sdal = _sdal;
         stage = _stage;
         editingAppoint = toEdit;
         customers = FXCollections.observableArrayList(sdal.getCustomers());
+        appointments = _appointments;
         
         customerCombo.setItems(customers);
         
@@ -190,7 +192,34 @@ public class AddEditAppointController implements Initializable {
                localStringToInstant(startField.getText()),
                localStringToInstant(endField.getText())
         );  
+        
+        //Check for appointment overlap
+        boolean overlaps = false;
+        long newStart = formAppoint.getStart().getEpochSecond();
+        long newEnd = formAppoint.getStop().getEpochSecond();
+        
+        for(Appointment appt : appointments)
+        {
+            long peStart = appt.getStart().getEpochSecond();
+            long peEnd = appt.getStop().getEpochSecond();
             
+            boolean startOverlap = newStart >= peStart && newStart <= peEnd;
+            boolean endOverlap = newEnd > peStart && newEnd < peEnd;
+            if(startOverlap || endOverlap)
+            {
+                overlaps = true;
+                String errorMessage = "New appointment overlaps with existing appointment."
+                        + "\n\nExisting Appointment"
+                        + "\nTitle: " + appt.getTitle()
+                        + "\nCustomer: " + appt.getCustomer().getName()
+                        + "\nStart: " + appt.getStart().toString()
+                        + "\nEnd: " + appt.getStop().toString();
+                new Alert(Alert.AlertType.ERROR, errorMessage).show();
+                return;
+            }
+        }
+        
+        //At this point, we're inserting, so all error checking needs to be done already
         if(editingAppoint == null)
         {
             //Add customer
