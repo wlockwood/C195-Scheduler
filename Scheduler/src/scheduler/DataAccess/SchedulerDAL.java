@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimeZone;
 import scheduler.Model.Address;
 import scheduler.Model.Appointment;
 import scheduler.Model.Customer;
@@ -107,6 +108,7 @@ public class SchedulerDAL {
     
     public Appointment extractAppoint(ResultSet dbRow) throws SQLException
     {
+        long offsetMillis = TimeZone.getDefault().getOffset(Instant.now().toEpochMilli());
         return new Appointment(
             dbRow.getInt("appointmentId"),
             extractCustomer(dbRow),
@@ -116,8 +118,8 @@ public class SchedulerDAL {
             dbRow.getString("contact"),
             dbRow.getString("type"),
             dbRow.getString("url"),
-            dbRow.getTimestamp("start").toInstant(),
-            dbRow.getTimestamp("end").toInstant()
+            dbRow.getTimestamp("start").toInstant().plusMillis(offsetMillis), //This is a silly approach, but there appears to be a bug in the JDBC driver.
+            dbRow.getTimestamp("end").toInstant().plusMillis(offsetMillis)
             );
     }
     
@@ -406,6 +408,8 @@ public class SchedulerDAL {
 
     
     public void updateAppointment(Appointment updatedAppoint) throws SQLException {
+        long offsetMillis = TimeZone.getDefault().getOffset(Instant.now().toEpochMilli());
+        
         String sql = "UPDATE appointment\n" +
             "SET\n" +
             "	customerId = ?,\n" +
@@ -431,8 +435,8 @@ public class SchedulerDAL {
         preps.setString(5, updatedAppoint.getContact());
         preps.setString(6, updatedAppoint.getType());
         preps.setString(7, updatedAppoint.getUrl());
-        preps.setTimestamp(8, Timestamp.from(updatedAppoint.getStart()));
-        preps.setTimestamp(9, Timestamp.from(updatedAppoint.getEnd()));
+        preps.setTimestamp(8, Timestamp.from(updatedAppoint.getStart().minusMillis(offsetMillis)));
+        preps.setTimestamp(9, Timestamp.from(updatedAppoint.getEnd().minusMillis(offsetMillis)));
 
         Instant now = Instant.now();
         preps.setTimestamp(10, Timestamp.from(now));
@@ -444,6 +448,8 @@ public class SchedulerDAL {
     public int addAppointment(Appointment newAppoint) throws Exception {
         try
         {
+            long offsetMillis = TimeZone.getDefault().getOffset(Instant.now().toEpochMilli());
+            
             db.setAutoCommit(false);
             
             ResultSet userResult = parameterizedQuery("SELECT userId from user WHERE userName = ?", userName);
@@ -473,8 +479,8 @@ public class SchedulerDAL {
             preps.setString(6, newAppoint.getContact());
             preps.setString(7, newAppoint.getType());
             preps.setString(8, newAppoint.getUrl());
-            preps.setTimestamp(9, Timestamp.from(newAppoint.getStart()));
-            preps.setTimestamp(10, Timestamp.from(newAppoint.getEnd()));
+            preps.setTimestamp(9, Timestamp.from(newAppoint.getStart().minusMillis(offsetMillis)));
+            preps.setTimestamp(10, Timestamp.from(newAppoint.getEnd().minusMillis(offsetMillis)));
             
             Instant now = Instant.now();
             preps.setTimestamp(11, Timestamp.from(now));

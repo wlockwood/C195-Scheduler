@@ -5,6 +5,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
@@ -51,6 +52,10 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         Locale here = Locale.getDefault();
+        System.out.println("Found locale: " + here.toString());
+        TimeZone hereZone = TimeZone.getDefault();
+        System.out.println("Found time zone: " + hereZone.toString());
+        
         foundRb = ResourceBundle.getBundle("scheduler/login", here);
         regionDetected.setText(foundRb.getString("regionHere"));
         unLabel.setText(foundRb.getString("username"));

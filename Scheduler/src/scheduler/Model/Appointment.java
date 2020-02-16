@@ -1,11 +1,9 @@
 package scheduler.Model;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.TimeZone;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Appointment {
     private int appointmentId;
@@ -115,14 +113,30 @@ public class Appointment {
         this.end = end;
     }
     
-    public LocalDateTime getLocalizedStart()
+    public ZonedDateTime getLocalizedStart()
     {
         return LocalizeTime(start);
     }
     
-    public LocalDateTime getLocalizedEnd()
+    public ZonedDateTime getLocalizedEnd()
     {
         return LocalizeTime(end);
+    }
+    
+    public String getPrettyLocalStart()
+    {
+        ZonedDateTime start = getLocalizedStart();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
+        String output = start.format(formatter);
+        return output;
+    }
+    
+    public String getPrettyLocalEnd()
+    {
+        ZonedDateTime end = getLocalizedEnd();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
+        String output = end.format(formatter);
+        return output;
     }
     
     public String toMultilineString()
@@ -132,12 +146,9 @@ public class Appointment {
             + "\nStart: " + getLocalizedStart().toString()
             + "\nEnd: " + getLocalizedEnd().toString();   
     }
-         
   
-    public static LocalDateTime LocalizeTime(Instant utcTime)
+    public static ZonedDateTime LocalizeTime(Instant utcTime)
     {
-        TimeZone here = TimeZone.getDefault();
-        return utcTime.atZone(here.toZoneId())
-                    .toLocalDateTime();
+        return utcTime.atZone(ZoneId.systemDefault());
     }
 }

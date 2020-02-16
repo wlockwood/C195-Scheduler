@@ -30,11 +30,6 @@ public class MenuController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
     }    
 
-    public void setDal(SchedulerDAL dal)
-    {
-        
-    }
-    
     @FXML
     private void handleCustomersClick(ActionEvent event) throws SQLException {
         System.out.println("Opening Customers window...");
