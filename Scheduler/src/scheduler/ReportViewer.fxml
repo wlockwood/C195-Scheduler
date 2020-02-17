@@ -29,8 +29,8 @@
          </font>
       </Label>
       <Label fx:id="reportTypeLabel" text="Report Type" GridPane.columnIndex="1" />
-      <Button mnemonicParsing="false" text="Previous" GridPane.columnIndex="2" />
-      <Button mnemonicParsing="false" text="Next" GridPane.columnIndex="3" />
+      <Button fx:id="previousButton" mnemonicParsing="false" text="Previous" GridPane.columnIndex="2" />
+      <Button fx:id="nextButton" mnemonicParsing="false" text="Next" GridPane.columnIndex="3" />
       <TextArea fx:id="reportArea" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="1" GridPane.rowSpan="4" />
    </children>
 </GridPane>

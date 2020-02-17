@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 
 public class Appointment {
     private int appointmentId;
@@ -145,6 +146,12 @@ public class Appointment {
             + "\nCustomer: " + customer.getName()
             + "\nStart: " + getLocalizedStart().toString()
             + "\nEnd: " + getLocalizedEnd().toString();   
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "Title: " + title + " | Customer: " + customer.getName() + " | Start: " + getPrettyLocalStart();
     }
   
     public static ZonedDateTime LocalizeTime(Instant utcTime)
