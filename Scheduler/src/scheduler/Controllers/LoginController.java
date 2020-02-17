@@ -2,7 +2,13 @@ package scheduler.Controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
@@ -74,6 +80,9 @@ public class LoginController implements Initializable {
         {
             showMainMenu();
             System.out.println("Logged in successfully.");
+            Path path = Paths.get("logins.log");
+            String logEntry = ZonedDateTime.now().toString() + "," + user + "\n";
+            Files.write(path, logEntry.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         }
         else
         {

@@ -248,7 +248,7 @@ public class SchedulerDAL {
         Instant now = Instant.now();
         preps.setTimestamp(4, Timestamp.from(now));
         preps.setString(5, userName);
-        preps.setInt(7, cust.getCustomerId());
+        preps.setInt(6, cust.getCustomerId());
         preps.execute();
     }
     
@@ -505,5 +505,58 @@ public class SchedulerDAL {
             db.setAutoCommit(true);
         }
     }
+    
+    //Reports
+    
+    public ArrayList<AppMonthType> getAppointmentsByMonthType() throws SQLException
+    {
+        String sql = "SELECT type,MONTH(start) AS 'month',MONTHNAME(start) AS 'monthName',COUNT(appointmentId) AS 'num'\n" +
+            "FROM U04SVR.appointment GROUP BY type,MONTH(start);";
+        ResultSet results = query(sql);
+        
+        ArrayList<AppMonthType> output = new ArrayList<>();
+        while(results.next())
+        {
+            AppMonthType amt = new AppMonthType();
+            amt.month  = results.getInt("month");
+            amt.monthName = results.getString("monthName");
+            amt.count = results.getInt("num");
+            amt.type = results.getString("type");
+        }
+        return output;
+    }
+    
+    class AppMonthType
+    {
+        public String type;
+        public int month;
+        public int count;
+        public String monthName;
+    }
+    
+    public ArrayList<Appointment> getAppointmentsForCustomer(int customerId) throws SQLException
+    {
+        String sql = "SELECT * FROM appointment WHERE customerId = ?";
+        ResultSet results = parameterizedQuery(sql, customerId);
+        ArrayList<Appointment> output = new ArrayList<>();
+        while(results.next())
+        {
+            output.add(extractAppoint(results));
+        }
+        return output;
+    }
+    
+    public ArrayList<Appointment> getAppointmentsForUser(int userId) throws SQLException
+    {
+        String sql = "SELECT * FROM appointment WHERE userId = ?";
+        ResultSet results = parameterizedQuery(sql, userId);
+        ArrayList<Appointment> output = new ArrayList<>();
+        while(results.next())
+        {
+            output.add(extractAppoint(results));
+        }
+        return output;
+    }
+    
     
 }

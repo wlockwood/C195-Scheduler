@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
-import java.util.stream.Stream;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -64,8 +63,6 @@ public class MenuController implements Initializable {
                 new Alert(AlertType.INFORMATION,"You have an upcoming appointment:\n" + appt.toMultilineString()).show();
             }
         }
-            
-        
     }
     
     private void showViewer(ViewerController.TypeMode mode) throws SQLException
