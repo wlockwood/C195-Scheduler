@@ -55,6 +55,7 @@ public class ReportViewerController implements Initializable {
                 throw new Exception("No user specified for user-specific report.");
             }
             ArrayList<Appointment> appointments = sdal.getAppointmentsForUser(selectedUser.userId);
+            sortAppointments(appointments);
             StringBuilder sb = new StringBuilder();
             for(Appointment a : appointments)
             {
@@ -70,6 +71,7 @@ public class ReportViewerController implements Initializable {
                 throw new Exception("No customer specified for customer-specific report.");
             }
             ArrayList<Appointment> appointments = sdal.getAppointmentsForCustomer(selectedCustomer.getCustomerId());
+            sortAppointments(appointments);
             StringBuilder sb = new StringBuilder();
             for(Appointment a : appointments)
             {
@@ -89,7 +91,7 @@ public class ReportViewerController implements Initializable {
         }
     }
     
-    private String enstringAppointmentsByMonth(ArrayList<Appointment> appoints)
+    private void sortAppointments(ArrayList<Appointment> appoints)
     {
         //Sort appointments by start time
         appoints.sort(new Comparator<Appointment>() {
@@ -99,6 +101,11 @@ public class ReportViewerController implements Initializable {
                 return (int) (a2.getStart().getEpochSecond() - a1.getStart().getEpochSecond());
             }
         });
+    }
+    
+    private String enstringAppointmentsByMonth(ArrayList<Appointment> appoints)
+    {
+        sortAppointments(appoints);
         
         //List appointments
         StringBuilder sb = new StringBuilder(appoints.size() * 50);
