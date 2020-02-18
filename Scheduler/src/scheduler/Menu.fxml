@@ -21,7 +21,7 @@
       </Label>
       <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
          <children>
-            <ComboBox prefWidth="150.0" />
+            <ComboBox fx:id="userCombo" prefWidth="150.0" />
             <Button fx:id="appointmentsByUserButton" alignment="CENTER" mnemonicParsing="false" onAction="#handleReportUserAppointments" prefWidth="200.0" text="Appointments for user" />
          </children>
          <VBox.margin>
@@ -33,7 +33,7 @@
       </HBox>
       <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
          <children>
-            <ComboBox prefWidth="150.0" />
+            <ComboBox fx:id="customerCombo" prefWidth="150.0" />
             <Button fx:id="appointmentsByCustomerButton" alignment="CENTER" mnemonicParsing="false" onAction="#handleReportCustomerAppointments" prefWidth="200.0" text="Appointments for customer" />
          </children>
          <padding>

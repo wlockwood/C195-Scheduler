@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package scheduler.Controllers;
 
 import java.io.IOException;
@@ -31,11 +26,6 @@ import scheduler.DataAccess.SchedulerDAL;
 import scheduler.Model.Appointment;
 import scheduler.Model.Customer;
 
-/**
- * FXML Controller class
- *
- * @author Capsi
- */
 public class AddEditAppointController implements Initializable {
 
     SchedulerDAL sdal;

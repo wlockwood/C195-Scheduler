@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
@@ -14,13 +13,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.TimeZone;
 import scheduler.Model.Address;
 import scheduler.Model.Appointment;
 import scheduler.Model.Customer;
+import scheduler.Model.User;
 
 
 public class SchedulerDAL {
@@ -153,7 +150,47 @@ public class SchedulerDAL {
     }
     
     //Customer CRUD
-    
+    public int addCustomer(Customer newCust) throws SQLException {
+        try
+        {
+            db.setAutoCommit(false);    //Must be disabled start a transaction
+            
+            int addressId = getAddressIdWithInsert(newCust.getAddress());
+            
+            //Write customer
+            String sql = "INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdateBy)\n" +
+                "Values (?,?,?,?,?,?)";
+            PreparedStatement preps = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            
+            preps.setString(1, newCust.getName());
+            preps.setInt(2, addressId);
+            preps.setBoolean(3, newCust.isActive());
+            Instant now = Instant.now();
+            preps.setTimestamp(4, Timestamp.from(now));
+            preps.setString(5, userName);
+            preps.setString(6, userName);
+            preps.execute();
+            
+            ResultSet keys = preps.getGeneratedKeys();    
+            keys.next();  
+            int key = keys.getInt(1);
+            
+            db.commit();
+            return key;
+        }
+        catch (SQLException se)
+        {
+            db.rollback();
+            throw se;
+        }
+        finally
+        {
+            db.setAutoCommit(true);
+        }
+        
+    }
+
     public void deleteCustomer(int customerId) throws SQLException
     {
         String sql = "DELETE FROM customer WHERE customerId = ?";
@@ -364,49 +401,7 @@ public class SchedulerDAL {
         preps.setInt(1, appointmentId);
         preps.execute();
     }
-
-    public int addCustomer(Customer newCust) throws SQLException {
-        try
-        {
-            db.setAutoCommit(false);    //Must be disabled start a transaction
-            
-            int addressId = getAddressIdWithInsert(newCust.getAddress());
-            
-            //Write customer
-            String sql = "INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdateBy)\n" +
-                "Values (?,?,?,?,?,?)";
-            PreparedStatement preps = db.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-
-            
-            preps.setString(1, newCust.getName());
-            preps.setInt(2, addressId);
-            preps.setBoolean(3, newCust.isActive());
-            Instant now = Instant.now();
-            preps.setTimestamp(4, Timestamp.from(now));
-            preps.setString(5, userName);
-            preps.setString(6, userName);
-            preps.execute();
-            
-            ResultSet keys = preps.getGeneratedKeys();    
-            keys.next();  
-            int key = keys.getInt(1);
-            
-            db.commit();
-            return key;
-        }
-        catch (SQLException se)
-        {
-            db.rollback();
-            throw se;
-        }
-        finally
-        {
-            db.setAutoCommit(true);
-        }
-        
-    }
-
-    
+   
     public void updateAppointment(Appointment updatedAppoint) throws SQLException {
         long offsetMillis = TimeZone.getDefault().getOffset(Instant.now().toEpochMilli());
         
@@ -506,6 +501,22 @@ public class SchedulerDAL {
         }
     }
     
+    //User R(CUD?)
+    
+    public ArrayList<User> getUsers() throws SQLException
+    {
+        ResultSet results = query("SELECT * FROM user");
+        ArrayList<User> output = new ArrayList<>();
+        while(results.next())
+        {
+            User u = new User();
+            u.userId = results.getInt("userId");
+            u.userName = results.getString("userName");
+            output.add(u);
+        }
+        return output;
+    }
+    
     //Reports
     
     public ArrayList<AppMonthType> getAppointmentsByMonthType() throws SQLException
@@ -536,7 +547,33 @@ public class SchedulerDAL {
     
     public ArrayList<Appointment> getAppointmentsForCustomer(int customerId) throws SQLException
     {
-        String sql = "SELECT * FROM appointment WHERE customerId = ?";
+        String sql = "SELECT\n" +
+        "	A.appointmentId,\n" +
+        "    A.title,\n" +
+        "    A.description,\n" +
+        "    A.location,\n" +
+        "    A.contact,\n" +
+        "    A.type,\n" +
+        "    A.url,\n" +
+        "    A.start,\n" +
+        "    A.end,\n" +
+        "    A.lastUpdate,\n" +
+        "	CU.customerId,\n" +
+        "    CU.customerName,\n" +
+        "    CU.addressId,\n" +
+        "    CU.active,\n" +
+        "    AD.address,\n" +
+        "    AD.address2,\n" +
+        "	city.city,\n" +
+        "    country.country,\n" +
+        "    AD.postalCode,\n" +
+        "    AD.phone\n" +
+        "FROM appointment A\n" +
+        "INNER JOIN customer CU ON A.customerId = CU.customerId\n" +
+        "INNER JOIN address AD ON CU.addressId = AD.addressId\n" +
+        "INNER JOIN city ON AD.cityId = city.cityId\n" +
+        "INNER JOIN country ON city.countryId = country.countryId\n" +
+        "WHERE A.customerId = ?";
         ResultSet results = parameterizedQuery(sql, customerId);
         ArrayList<Appointment> output = new ArrayList<>();
         while(results.next())
@@ -548,7 +585,33 @@ public class SchedulerDAL {
     
     public ArrayList<Appointment> getAppointmentsForUser(int userId) throws SQLException
     {
-        String sql = "SELECT * FROM appointment WHERE userId = ?";
+        String sql = "SELECT\n" +
+        "	A.appointmentId,\n" +
+        "    A.title,\n" +
+        "    A.description,\n" +
+        "    A.location,\n" +
+        "    A.contact,\n" +
+        "    A.type,\n" +
+        "    A.url,\n" +
+        "    A.start,\n" +
+        "    A.end,\n" +
+        "    A.lastUpdate,\n" +
+        "	CU.customerId,\n" +
+        "    CU.customerName,\n" +
+        "    CU.addressId,\n" +
+        "    CU.active,\n" +
+        "    AD.address,\n" +
+        "    AD.address2,\n" +
+        "	city.city,\n" +
+        "    country.country,\n" +
+        "    AD.postalCode,\n" +
+        "    AD.phone\n" +
+        "FROM appointment A\n" +
+        "INNER JOIN customer CU ON A.customerId = CU.customerId\n" +
+        "INNER JOIN address AD ON CU.addressId = AD.addressId\n" +
+        "INNER JOIN city ON AD.cityId = city.cityId\n" +
+        "INNER JOIN country ON city.countryId = country.countryId\n" +
+        "WHERE A.userId = ?";
         ResultSet results = parameterizedQuery(sql, userId);
         ArrayList<Appointment> output = new ArrayList<>();
         while(results.next())

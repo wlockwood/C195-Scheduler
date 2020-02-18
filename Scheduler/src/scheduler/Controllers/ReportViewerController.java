@@ -5,15 +5,12 @@
  */
 package scheduler.Controllers;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -23,6 +20,7 @@ import javafx.stage.Stage;
 import scheduler.DataAccess.SchedulerDAL;
 import scheduler.Model.Appointment;
 import scheduler.Model.Customer;
+import scheduler.Model.User;
 
 
 public class ReportViewerController implements Initializable {
@@ -31,12 +29,13 @@ public class ReportViewerController implements Initializable {
     Stage stage;
     ReportType mode;
     Customer selectedCustomer;
-    int userId = -1;
+    private User selectedUser;
     
     @FXML private Label reportTypeLabel;
     @FXML private Button previousButton;
     @FXML private Button nextButton;
     @FXML private TextArea reportArea;
+    
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {}    
@@ -48,21 +47,41 @@ public class ReportViewerController implements Initializable {
 
         ArrayList<Customer> customers = sdal.getCustomers();    //Used by both modes
         
+        
         if(mode == ReportType.SingleUser)
         {
-            if(userId < 0)
+            if(selectedUser == null)
             {
                 throw new Exception("No user specified for user-specific report.");
             }
-            ArrayList<Appointment> appoints = sdal.getAppointmentsForUser(userId);
+            ArrayList<Appointment> appointments = sdal.getAppointmentsForUser(selectedUser.userId);
+            StringBuilder sb = new StringBuilder();
+            for(Appointment a : appointments)
+            {
+                sb.append(a.toString() + "\n");
+            }
+            reportArea.setText(sb.toString());
+            
         }
         else if (mode == ReportType.SingleCustomer)
         {
+            if(selectedCustomer == null)
+            {
+                throw new Exception("No customer specified for customer-specific report.");
+            }
+            ArrayList<Appointment> appointments = sdal.getAppointmentsForCustomer(selectedCustomer.getCustomerId());
+            StringBuilder sb = new StringBuilder();
+            for(Appointment a : appointments)
+            {
+                sb.append(a.toString() + "\n");
+            }
+            reportArea.setText(sb.toString());
             
         }
         else if (mode == ReportType.TypeMonthGroup)
         {
-
+            ArrayList<Appointment> appointments = sdal.getAppointments();
+            reportArea.setText(enstringAppointmentsByMonth(appointments));
         }
         else
         {
@@ -101,6 +120,10 @@ public class ReportViewerController implements Initializable {
     public void setCustomer(Customer _cust)
     {
         selectedCustomer = _cust;
+    }
+
+    void setUser(User _user) {
+        selectedUser = _user;
     }
     
     public enum ReportType
