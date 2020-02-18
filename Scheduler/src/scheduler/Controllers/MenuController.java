@@ -15,6 +15,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import scheduler.DataAccess.SchedulerDAL;
 import scheduler.Model.Appointment;
@@ -24,25 +25,26 @@ public class MenuController implements Initializable {
 
     SchedulerDAL sdal;
     Stage stage;
+    @FXML private Button viewCalendarButton;
+    @FXML private Button appointmentsByUserButton;
+    @FXML private Button appointmentsByCustomerButton;
+    @FXML private Button appointmentMonthTypeButton;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
     }    
 
-    @FXML
-    private void handleCustomersClick(ActionEvent event) throws SQLException {
+    @FXML private void handleCustomersClick(ActionEvent event) throws SQLException {
         System.out.println("Opening Customers window...");
         showViewer(ViewerController.TypeMode.Customer);
     }
 
-    @FXML
-    private void handleAppointClick(ActionEvent event) throws SQLException {
+    @FXML private void handleAppointClick(ActionEvent event) throws SQLException {
         System.out.println("Opening Appointments window...");
         showViewer(ViewerController.TypeMode.Appointment);
     }
     
-    @FXML
-    private void handleCalendarClick(ActionEvent event) {
+    @FXML private void handleCalendarClick(ActionEvent event) {
         System.out.println("Opening Calendar window...");
         new Alert(Alert.AlertType.INFORMATION, "Not actually implemented yet.")
                 .show();
@@ -89,6 +91,15 @@ public class MenuController implements Initializable {
             al.show();
         }
         
+    }
+
+    @FXML private void handleReportUserAppointments(ActionEvent event) {
+    }
+
+    @FXML private void handleReportCustomerAppointments(ActionEvent event) {
+    }
+
+    @FXML private void handleReportAppointmentTypesByMonth(ActionEvent event) {
     }
     
 
