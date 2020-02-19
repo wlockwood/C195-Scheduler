@@ -53,10 +53,9 @@ public class MenuController implements Initializable {
         showViewer(ViewerController.TypeMode.Appointment);
     }
     
-    @FXML private void handleCalendarClick(ActionEvent event) {
+    @FXML private void handleCalendarClick(ActionEvent event) throws SQLException {
         System.out.println("Opening Calendar window...");
-        new Alert(Alert.AlertType.INFORMATION, "Not actually implemented yet.")
-                .show();
+        showCalendar();
     }
 
     void construct(SchedulerDAL _sdal, Stage _stage) throws SQLException {
@@ -184,5 +183,29 @@ public class MenuController implements Initializable {
         }
     }
     
+    private void showCalendar() throws SQLException
+    {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/scheduler/Calendar.fxml"));
+        try
+        {
+            Parent root = loader.load();
+            CalendarController cc = loader.getController();
+            cc.construct(sdal);
+
+            //Open in new window
+            Scene scene = new Scene(root);
+            Stage substage = new Stage();
+            substage.setScene(scene);
+            substage.initOwner(stage);
+            
+            substage.show();
+        }
+        catch (IOException ioe)
+        {
+            Alert al = new Alert(Alert.AlertType.ERROR);
+            al.setContentText("Unable to load Viewer interface.");
+            al.show();
+        }
+    }
     
 }
