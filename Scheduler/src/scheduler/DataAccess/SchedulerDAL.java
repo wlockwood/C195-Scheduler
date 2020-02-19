@@ -273,7 +273,7 @@ public class SchedulerDAL {
             "	customerName = ?, \n" +
             "	addressId = ?, \n" +
             "    active = ?, \n" +
-            "    lastUpdate = ?\n" +
+            "    lastUpdate = ?,\n" +
             "    lastUpdateBy = ?\n" +
             "WHERE\n" +
             "	customerId = ?";
@@ -533,11 +533,16 @@ public class SchedulerDAL {
             amt.monthName = results.getString("monthName");
             amt.count = results.getInt("num");
             amt.type = results.getString("type");
+            if("".equals(amt.type) || amt.type == null)
+            {
+                amt.type = "[No type specified]";
+            }
+            output.add(amt);
         }
         return output;
     }
     
-    class AppMonthType
+    public class AppMonthType
     {
         public String type;
         public int month;

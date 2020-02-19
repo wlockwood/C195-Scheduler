@@ -88,8 +88,8 @@ public class ReportViewerController implements Initializable {
         }
         else if (mode == ReportType.TypeMonthGroup)
         {
-            ArrayList<Appointment> appointments = sdal.getAppointments();
-            reportArea.setText(enstringAppointmentsByMonth(appointments));
+            ArrayList<SchedulerDAL.AppMonthType> stats = sdal.getAppointmentsByMonthType();
+            reportArea.setText(enstringAppointmentsByMonth(stats));
         }
         else
         {
@@ -109,20 +109,19 @@ public class ReportViewerController implements Initializable {
         });
     }
     
-    private String enstringAppointmentsByMonth(ArrayList<Appointment> appoints)
+    private String enstringAppointmentsByMonth(ArrayList<SchedulerDAL.AppMonthType> stats)
     {
-        sortAppointments(appoints);
-        
+       
         //List appointments
-        StringBuilder sb = new StringBuilder(appoints.size() * 50);
+        StringBuilder sb = new StringBuilder(stats.size() * 5);
         for(int month = 1; month <= 12; month++)
         {
             sb.append(" - " + java.time.Month.of(month).name() + " - \n");
-            for(Appointment appoint : appoints)
+            for(SchedulerDAL.AppMonthType aStat : stats)
             {
-                if(appoint.getLocalizedStart().getMonthValue() == month)
+                if(aStat.month == month)
                 {
-                    sb.append(appoint.toString() + "\n");
+                    sb.append(aStat.type + ": " + aStat.count + "\n");
                 }
             }
         }
