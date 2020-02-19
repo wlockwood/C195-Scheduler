@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<GridPane alignment="CENTER" prefHeight="522.0" prefWidth="686.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scheduler.Controller.CalendarController">
+   <columnConstraints>
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="148.0" minWidth="10.0" prefWidth="148.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="176.0" minWidth="10.0" prefWidth="79.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="276.0" minWidth="10.0" prefWidth="267.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="343.0" minWidth="10.0" prefWidth="50.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="257.0" minWidth="10.0" prefWidth="50.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="171.0" minHeight="10.0" prefHeight="71.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="451.0" minHeight="10.0" prefHeight="451.0" vgrow="SOMETIMES" />
+   </rowConstraints>
+   <children>
+      <TableView fx:id="calendarTableView" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="5" GridPane.rowIndex="1">
+        <columns>
+          <TableColumn fx:id="startCol" prefWidth="150.0" text="Start" />
+          <TableColumn fx:id="endCol" prefWidth="150.0" text="End" />
+            <TableColumn fx:id="customerCol" prefWidth="150.0" text="Customer" />
+            <TableColumn fx:id="titleCol" prefWidth="229.0" text="Title" />
+        </columns>
+      </TableView>
+      <Label text="Calendar View">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <Button mnemonicParsing="false" onAction="#previousClick" text="Previous" GridPane.columnIndex="3" />
+      <Button mnemonicParsing="false" onAction="#nextClick" text="Next" GridPane.columnIndex="4" />
+      <VBox alignment="CENTER" spacing="15.0" GridPane.columnIndex="1">
+         <children>
+            <RadioButton fx:id="weeklyRadio" mnemonicParsing="false" onAction="#weeklySelected" selected="true" text="Weekly">
+               <toggleGroup>
+                  <ToggleGroup fx:id="calendarViewMode" />
+               </toggleGroup>
+            </RadioButton>
+            <RadioButton fx:id="monthlyRadio" mnemonicParsing="false" onAction="#monthlySelected" text="Monthly" toggleGroup="$calendarViewMode" />
+         </children>
+         <GridPane.margin>
+            <Insets />
+         </GridPane.margin>
+      </VBox>
+      <VBox alignment="CENTER" spacing="15.0" GridPane.columnIndex="2">
+         <children>
+            <Label fx:id="startDateLabel" text="Start date" />
+            <Label fx:id="endDateLabel" text="End date" />
+         </children>
+      </VBox>
+   </children>
+</GridPane>

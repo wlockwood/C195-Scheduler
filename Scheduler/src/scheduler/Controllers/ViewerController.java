@@ -33,8 +33,7 @@ public class ViewerController implements Initializable {
     SchedulerDAL sdal;
     Stage stage;
     TypeMode mode;
-    @FXML
-    private TableView<Customer> customersTable;
+    @FXML private TableView<Customer> customersTable;
     @FXML private TableColumn<Customer, Integer> custIdCol;
     @FXML private TableColumn<Customer, String> custNameCol;
     @FXML private TableColumn<Customer, String> custAddrCol;

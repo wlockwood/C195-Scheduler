@@ -90,6 +90,7 @@ public class MenuController implements Initializable {
                     ap.getName().equals(string)).findFirst().orElse(null);
             }
         });
+        customerCombo.getSelectionModel().select(0);
         
         //Populate user combobox for reports
         userCombo.itemsProperty().set(FXCollections.observableArrayList(sdal.getUsers()));
@@ -106,6 +107,7 @@ public class MenuController implements Initializable {
                     ap.userName.equals(string)).findFirst().orElse(null);
             }
         });
+        userCombo.getSelectionModel().select(0);
     }
     
     private void showViewer(ViewerController.TypeMode mode) throws SQLException

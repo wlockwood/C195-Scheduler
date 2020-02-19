@@ -54,6 +54,9 @@ public class ReportViewerController implements Initializable {
             {
                 throw new Exception("No user specified for user-specific report.");
             }
+            
+            reportTypeLabel.setText("Appointments for user '" + selectedUser.userName +"'");
+            
             ArrayList<Appointment> appointments = sdal.getAppointmentsForUser(selectedUser.userId);
             sortAppointments(appointments);
             StringBuilder sb = new StringBuilder();
@@ -70,6 +73,9 @@ public class ReportViewerController implements Initializable {
             {
                 throw new Exception("No customer specified for customer-specific report.");
             }
+            
+            reportTypeLabel.setText("Appointments for customer '" + selectedCustomer.getName() +"'");            
+            
             ArrayList<Appointment> appointments = sdal.getAppointmentsForCustomer(selectedCustomer.getCustomerId());
             sortAppointments(appointments);
             StringBuilder sb = new StringBuilder();
@@ -98,7 +104,7 @@ public class ReportViewerController implements Initializable {
             @Override
             public int compare(Appointment a1, Appointment a2)
             {
-                return (int) (a2.getStart().getEpochSecond() - a1.getStart().getEpochSecond());
+                return (int) (a1.getStart().getEpochSecond() - a2.getStart().getEpochSecond());
             }
         });
     }
@@ -119,7 +125,6 @@ public class ReportViewerController implements Initializable {
                     sb.append(appoint.toString() + "\n");
                 }
             }
-            
         }
         return sb.toString();
     }
