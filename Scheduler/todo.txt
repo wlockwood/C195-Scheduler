@@ -1,6 +1,0 @@
-Appointments of type per month
-Get appointments for user
-Get appointments for customer
-
-Test customer updates
-
